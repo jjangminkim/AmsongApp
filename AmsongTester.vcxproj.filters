@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="리소스 파일">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="IdisSDK">
+      <UniqueIdentifier>{9421ee1c-8479-4419-b65f-dc222db5fce8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UserInterface">
+      <UniqueIdentifier>{1a1a6ed7-4613-4ddd-8c46-9e71a625bad6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core">
+      <UniqueIdentifier>{a5b89b03-100e-4deb-973b-4b9f21d31d6a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ReadMe.txt" />
+    <None Include="res\AmsongTester.rc2">
+      <Filter>리소스 파일</Filter>
+    </None>
+    <None Include="res\AmsongTester.ico">
+      <Filter>리소스 파일</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="AmsongTester.h" />
+    <ClInclude Include="targetver.h" />
+    <ClInclude Include="Resource.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="WatchSDK_Sample.h">
+      <Filter>IdisSDK</Filter>
+    </ClInclude>
+    <ClInclude Include="AmsongTesterDlg.h">
+      <Filter>UserInterface</Filter>
+    </ClInclude>
+    <ClInclude Include="ScreenViewWnd.h">
+      <Filter>UserInterface</Filter>
+    </ClInclude>
+    <ClInclude Include="DecoderSDK_Sample.h">
+      <Filter>IdisSDK</Filter>
+    </ClInclude>
+    <ClInclude Include="ScreenFormatter.h">
+      <Filter>UserInterface</Filter>
+    </ClInclude>
+    <ClInclude Include="ImageProcessor.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="AmsongTester.cpp" />
+    <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="WatchSDK_Sample.cpp">
+      <Filter>IdisSDK</Filter>
+    </ClCompile>
+    <ClCompile Include="AmsongTesterDlg.cpp">
+      <Filter>UserInterface</Filter>
+    </ClCompile>
+    <ClCompile Include="ScreenViewWnd.cpp">
+      <Filter>UserInterface</Filter>
+    </ClCompile>
+    <ClCompile Include="DecoderSDK_Sample.cpp">
+      <Filter>IdisSDK</Filter>
+    </ClCompile>
+    <ClCompile Include="ScreenFormatter.cpp">
+      <Filter>UserInterface</Filter>
+    </ClCompile>
+    <ClCompile Include="ImageProcessor.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="AmsongTester.rc">
+      <Filter>리소스 파일</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>
