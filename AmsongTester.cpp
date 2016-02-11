@@ -26,7 +26,7 @@ CAmsongTesterApp::CAmsongTesterApp()
 	m_dwRestartManagerSupportFlags = AFX_RESTART_MANAGER_SUPPORT_RESTART;
 
 	// TODO: 여기에 생성 코드를 추가합니다.
-	// InitInstance에 모든 중요한 초기화 작업을 배치합니다.
+	// InitInstance에 모든 중요한 초기화 작업을 배 치합니다.
 }
 
 
@@ -70,6 +70,10 @@ BOOL CAmsongTesterApp::InitInstance()
 	CAmsongTesterDlg dlg;
 	m_pMainWnd = &dlg;
 	INT_PTR nResponse = dlg.DoModal();
+
+	//
+
+
 	if (nResponse == IDOK)
 	{
 		// TODO: 여기에 [확인]을 클릭하여 대화 상자가 없어질 때 처리할

@@ -42,6 +42,8 @@ CAmsongTesterDlg::CAmsongTesterDlg(CWnd* pParent /*=NULL*/)
 	: CDialog(CAmsongTesterDlg::IDD, pParent)
     , _fDisconnectByMe(false)
     , _appStatus(APP_STATUS_DISCONNECTED)
+	, _captureDelayedMilisec(0)
+	, _eventOccurredTick(0)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
     
@@ -66,6 +68,9 @@ BEGIN_MESSAGE_MAP(CAmsongTesterDlg, CDialog)
 	ON_MESSAGE(UM_WATCH_DISCONNECTED, OnWatchDisConnected)
 	ON_MESSAGE(UM_WATCH_STATUSLOADED, OnWatchStatusLoaded)
     ON_MESSAGE(UM_WATCH_DEVICESTATUSLOADED, OnWatchDeviceStatusLoaded)
+	ON_MESSAGE(UM_WATCH_EVENTLOADED, OnWatchEventLoaded)
+	ON_BN_CLICKED(IDC_BUTTON_ENABLE_EVENT, &CAmsongTesterDlg::OnBnClickedButtonEnableEvent)
+	ON_BN_CLICKED(IDC_BUTTON_TEST, &CAmsongTesterDlg::OnBnClickedButtonTest)
 END_MESSAGE_MAP()
 
 // watchSDK callback function ///////////////////////////////////////////////
@@ -150,7 +155,7 @@ void IDISCALLBACK watch_eventLoaded(IDISHWATCH hWatch, IDISWPARAM wParam, IDISLP
             eventLog = L"ALARM_IN 이벤트 발생";
             break;
         case PARAMW_EVENTINFO::ALARM_IN_BAD:
-            eventLog = L"ALARM_IN 이벤트 발생";
+            eventLog = L"ALARM_IN_BAD 이벤트 발생";
             break;
         case PARAMW_EVENTINFO::MOTION:
             eventLog = L"MOTION 이벤트 발생";
@@ -163,8 +168,18 @@ void IDISCALLBACK watch_eventLoaded(IDISHWATCH hWatch, IDISWPARAM wParam, IDISLP
     }
 
     if (L"" != eventLog) {
+		eventLog.AppendFormat(L"(Msec:%d)", lpEventInfo->_tmMsec);
         rOwner.insertLog(eventLog);
     }
+
+	bool enabledType = PARAMW_EVENTINFO::ALARM_IN == lpEventInfo->_evtType ||
+					   PARAMW_EVENTINFO::MOTION == lpEventInfo->_evtType;
+
+	if (rOwner._enableEvent && enabledType) {
+		// alarm in event 발생시, 이미지를 _imageProcessor 클래스로 보낸다.
+		::PostMessage(rOwner.GetSafeHwnd(), UM_WATCH_EVENTLOADED, 0, 0);
+		//rOwner.captureImage();
+	}
 }
 
 void IDISCALLBACK watch_statusLoaded(IDISHWATCH hWatch, IDISWPARAM wParam, IDISLPARAM lParam)
@@ -263,16 +278,21 @@ BOOL CAmsongTesterDlg::OnInitDialog()
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
     _lpOwnerWnd = this;
     _fDisconnectByMe = false;
+	_enableEvent = true;
 
     // Init Controls
     setAppStatus(APP_STATUS_DISCONNECTED);
 
+	CString delayTime;
+
     _remoteAddress = theApp.GetProfileString(L"AMSONG_APP", L"RemoteAddress", L"");
     _remoteId = theApp.GetProfileString(L"AMSONG_APP", L"RemoteId", L"admin");
+	delayTime = theApp.GetProfileString(L"AMSONG_APP", L"CaptureDelay", L"50");
 
     SetDlgItemText(IDC_EDIT_REMOTE_ADDR, _remoteAddress);
     SetDlgItemText(IDC_EDIT_REMOTE_ID, _remoteId);
     SetDlgItemText(IDC_EDIT_REMOTE_PASSWORD, _remotePassword);
+	SetDlgItemText(IDC_EDIT_DELAY, delayTime);
 
     _screen.initialize(CRect(0, 0, 500, 280));
 	_screen.Create(IDD_DIALOG_SCREENVIEW, this);
@@ -345,6 +365,7 @@ void CAmsongTesterDlg::OnDestroy()
 
     theApp.WriteProfileStringW(L"AMSONG_APP", L"RemoteAddress", _remoteAddress);
     theApp.WriteProfileStringW(L"AMSONG_APP", L"RemoteId", _remoteId);
+	//theApp.WriteProfileStringW(L"AMSONG_APP", L"RemoteId", _remoteId);
 
     if (_watcher.isValidChannel(_channel) &&
 		_watcher.isConnected(_watchHandle, _channel)) {
@@ -382,6 +403,8 @@ void CAmsongTesterDlg::setAppStatus(unsigned char appStatus)
     GetDlgItem(IDC_BUTTON_CONNECT)->EnableWindow(disableAll ? FALSE : enable);
     GetDlgItem(IDC_BUTTON_DISCONNECT)->EnableWindow(disableAll ? FALSE : !enable);
     GetDlgItem(IDC_BUTTON_GEN_EVENT)->EnableWindow(disableAll ? FALSE : !enable);
+	GetDlgItem(IDC_BUTTON_ENABLE_EVENT)->EnableWindow(disableAll ? FALSE : !enable);
+	GetDlgItem(IDC_EDIT_DELAY)->EnableWindow(disableAll ? FALSE : !enable);
     GetDlgItem(IDC_EDIT_REMOTE_ADDR)->EnableWindow(disableAll ? FALSE : enable);
     GetDlgItem(IDC_EDIT_REMOTE_ID)->EnableWindow(disableAll ? FALSE : enable);
     GetDlgItem(IDC_BUTTON_CONNECT)->EnableWindow(disableAll ? FALSE : enable);
@@ -409,7 +432,8 @@ void CAmsongTesterDlg::captureImage()
     _screen.cpatureImage(_capturedImage, imageSize);
     _imageProcessor.setCapturedImage(_capturedImage, imageSize, imageWidth, imageHeight);
 
-    if (_capturedImage) {
+    if (_capturedImage)\'
+	{
         delete _capturedImage;
         _capturedImage = 0;
     }
@@ -553,4 +577,52 @@ LRESULT CAmsongTesterDlg::OnWatchDeviceStatusLoaded(WPARAM wParam, LPARAM lParam
     }
 
     return 1L;
+}
+
+LRESULT CAmsongTesterDlg::OnWatchEventLoaded(WPARAM wParam, LPARAM lParam)
+{
+	_eventOccurredTick = GetTickCount();
+
+	CString log;
+	log.Format(L"이벤트발생 tick: %d", _eventOccurredTick);
+    insertLog(log);
+
+	CString str;
+	GetDlgItemText(IDC_EDIT_DELAY, str);
+	_captureDelayedMilisec = _ttoi(str);
+
+	unsigned int _currentTick = GetTickCount();
+
+	while ((_currentTick - _eventOccurredTick) < _captureDelayedMilisec) {
+		// wait...
+		_currentTick = GetTickCount();
+	}
+
+	log.Format(L"이미지캡쳐 tick: %d", GetTickCount());
+    insertLog(log);
+
+	captureImage();
+
+	return 0L;
+}
+
+
+void CAmsongTesterDlg::OnBnClickedButtonEnableEvent()
+{
+	_enableEvent = !_enableEvent;
+
+	CString buttonTitle;
+	if (_enableEvent) {
+		buttonTitle = L"이벤트 감지 OFF";
+	}
+	else {
+		buttonTitle = L"이벤트 감지 ON";
+	}
+	SetDlgItemText(IDC_BUTTON_ENABLE_EVENT, buttonTitle);
+}
+
+
+void CAmsongTesterDlg::OnBnClickedButtonTest()
+{
+	_imageProcessor.setCapturedImage(0, 0, 0, 0, true);
 }

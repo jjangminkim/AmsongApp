@@ -15,7 +15,7 @@ private:
     cv::Mat _cpaturedImage;
 
 public:
-    void setCapturedImage(BYTE* _data, int size, int width, int height);
+    void setCapturedImage(BYTE* _data, int size, int width, int height, bool isTest = false);
 };
 
 

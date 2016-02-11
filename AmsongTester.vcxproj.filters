@@ -23,6 +23,9 @@
     <None Include="res\AmsongTester.ico">
       <Filter>리소스 파일</Filter>
     </None>
+    <None Include="ClassDiagram1.cd" />
+    <None Include="ClassDiagram2.cd" />
+    <None Include="ClassDiagram3.cd" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AmsongTester.h" />

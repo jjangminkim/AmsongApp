@@ -32,6 +32,7 @@ protected:
 
     int            _channel;
     unsigned int   _dvrAuthority;
+	bool		   _enableEvent;
 
     CString _remoteAddress;
     CString _remoteId;
@@ -40,6 +41,9 @@ protected:
 
     bool _fDisconnectByMe;
     unsigned char _appStatus;
+
+	unsigned int _captureDelayedMilisec;
+	unsigned int _eventOccurredTick;
 
     CListBox _logList;
 
@@ -73,6 +77,7 @@ public:
 	afx_msg LRESULT OnWatchDisConnected(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnWatchStatusLoaded(WPARAM wParam, LPARAM lParam);
     afx_msg LRESULT OnWatchDeviceStatusLoaded(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnWatchEventLoaded(WPARAM wParam, LPARAM lParam);
 
 public:
     friend void IDISCALLBACK watch_onConnected(IDISHWATCH hWatch, IDISWPARAM wParam, IDISLPARAM lParam);
@@ -81,6 +86,8 @@ public:
 	friend void IDISCALLBACK watch_eventLoaded(IDISHWATCH hWatch, IDISWPARAM wParam, IDISLPARAM lParam);
 	friend void IDISCALLBACK watch_statusLoaded(IDISHWATCH hWatch, IDISWPARAM wParam, IDISLPARAM lParam);
     friend void IDISCALLBACK watch_deviceStatusLoaded(IDISHWATCH hWatch, IDISWPARAM wParam, IDISLPARAM lParam);
+	afx_msg void OnBnClickedButtonEnableEvent();
+	afx_msg void OnBnClickedButtonTest();
 };
 
 #endif  // _AMSONG_TESTER_DLG_H
