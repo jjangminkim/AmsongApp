@@ -432,8 +432,7 @@ void CAmsongTesterDlg::captureImage()
     _screen.cpatureImage(_capturedImage, imageSize);
     _imageProcessor.setCapturedImage(_capturedImage, imageSize, imageWidth, imageHeight);
 
-    if (_capturedImage)\'
-	{
+    if (_capturedImage) {
         delete _capturedImage;
         _capturedImage = 0;
     }
