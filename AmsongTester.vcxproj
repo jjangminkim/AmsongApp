@@ -109,6 +109,7 @@
   <ItemGroup>
     <ClInclude Include="AmsongTester.h" />
     <ClInclude Include="AmsongTesterDlg.h" />
+    <ClInclude Include="AppTypes.h" />
     <ClInclude Include="DecoderSDK_Sample.h" />
     <ClInclude Include="ImageProcessor.h" />
     <ClInclude Include="Resource.h" />

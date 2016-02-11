@@ -12,6 +12,7 @@
 #include "IDIS_Define.h"
 #include "DecoderSDK_Sample.h"
 #include "ScreenFormatter.h"
+#include "AppTypes.h"
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -186,11 +187,25 @@ private:
 	bool				_fuse1x1Mode;
 	bool				_fuseAspectRatio;
 
+	Triangle _bigTriangle;
+	Triangle _middleTriangle;
+	Triangle _smallTriangle;
+
+	CRect _pie1;
+	CRect _pie2;
+	CRect _pie3;
+	CRect _pie4;
+
 // Getter, Setter
 public:
     int imageWidth()  { return _imageWidth;  }
     int imageHeight() { return _imageHeight; }
     int imageSize()   { return _imageWidth * _imageHeight * 4; }
+
+	void setBigTriangle(const Triangle& triangle) { _bigTriangle = triangle; }
+	void setMiddleTriangle(const Triangle& triangle) { _middleTriangle = triangle; }
+	void setSmallTriangle(const Triangle& triangle) { _smallTriangle = triangle; }
+	void setPies(const CRect& pie1, const CRect& pie2, const CRect& pie3, const CRect& pie4);
 
 // Operations
 public:
@@ -208,6 +223,7 @@ public:
 						UINT nFormat,
 						COLORREF clrText = RGB(255, 255, 255),
 						COLORREF clrBack = RGB(0, 0, 0));
+	bool drawObjects(CDC *pDC);
 
 	void imageAspectRatio(int cx, int cy, const CRect& rctin, CRect& rctout);
     void saveImage(TCHAR* path);
@@ -270,6 +286,14 @@ protected:
 };
 
 //////////////////////////////////////////////////////////////////////////
+
+inline void CScreenViewWnd::setPies(const CRect& pie1, const CRect& pie2, const CRect& pie3, const CRect& pie4)
+{
+	_pie1 = pie1;
+	_pie2 = pie2;
+	_pie3 = pie3;
+	_pie4 = pie4;
+}
 
 inline bool CScreenViewWnd::putLoadedFrame(const PARAMWS_FRAMEINFO& rFrame)
 {

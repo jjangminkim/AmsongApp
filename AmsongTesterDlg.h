@@ -67,11 +67,18 @@ protected:
     void setAppStatus(unsigned char appStatus);
     void insertLog(const CString& logMessage);
     void captureImage();
+	void insertObjects();
+	void saveObjects();
 
 public:
     afx_msg void OnBnClickedButtonConnect();
     afx_msg void OnBnClickedButtonDisconnect();
     afx_msg void OnBnClickedButtonGenEvent();
+	afx_msg void OnBnClickedButtonEnableEvent();
+	afx_msg void OnBnClickedButtonTest();
+	afx_msg void OnBnClickedButtonLineApply();
+	afx_msg void OnBnClickedButtonLineSave();
+	afx_msg void OnBnClickedButtonSaveImage();
 
     afx_msg LRESULT OnWatchConnected(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnWatchDisConnected(WPARAM wParam, LPARAM lParam);
@@ -86,8 +93,8 @@ public:
 	friend void IDISCALLBACK watch_eventLoaded(IDISHWATCH hWatch, IDISWPARAM wParam, IDISLPARAM lParam);
 	friend void IDISCALLBACK watch_statusLoaded(IDISHWATCH hWatch, IDISWPARAM wParam, IDISLPARAM lParam);
     friend void IDISCALLBACK watch_deviceStatusLoaded(IDISHWATCH hWatch, IDISWPARAM wParam, IDISLPARAM lParam);
-	afx_msg void OnBnClickedButtonEnableEvent();
-	afx_msg void OnBnClickedButtonTest();
+
+	//IDC_BUTTON_LINE_SAVE
 };
 
 #endif  // _AMSONG_TESTER_DLG_H

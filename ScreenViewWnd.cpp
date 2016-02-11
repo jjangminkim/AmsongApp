@@ -619,6 +619,8 @@ void CScreenViewWnd::drawImage(int camera,
 					  size.cx, size.cy,
 					  0);
 
+		drawObjects(&MemDC);
+
 		CRect rctOSD = rctDest;
 		rctOSD.DeflateRect(5, 2, 5, 3);
 
@@ -629,10 +631,12 @@ void CScreenViewWnd::drawImage(int camera,
 
 		CString strTitle = getCameraTitle(camera);
 
+		/*
 		CFont* lpFontPrev = MemDC->SelectObject(&_fontText);
 		drawText(&MemDC, strTitle, rctOSD, DT_TOP | DT_LEFT | DT_SINGLELINE);
 		drawText(&MemDC, strTime,  rctOSD, DT_BOTTOM | DT_CENTER | DT_SINGLELINE);
 		MemDC->SelectObject(lpFontPrev);
+		*/
 
 		COLORREF clrBorder = (_selectCamera == camera) ?
 					RGB(0, 255, 0) : RGB(255, 255, 255);
@@ -680,6 +684,66 @@ bool CScreenViewWnd::drawText(CDC *pDC,
 
 	pDC->SetBkMode(oldBkMod);
 	pDC->SetTextColor(oldColor);
+
+	return true;
+}
+
+bool CScreenViewWnd::drawObjects(CDC *pDC)
+{
+	ASSERT(pDC != NULL);
+	if (pDC->GetSafeHdc() == NULL) return false;
+
+	CPen pen;
+    pen.CreatePen(PS_SOLID, 2, RGB(0,0,0));
+    CPen* oldPen = pDC->SelectObject(&pen);
+
+	// 삼각형 그리기.
+	Point p1 = _bigTriangle.topLeft;
+	Point p2 = _bigTriangle.topRight;
+	Point p3 = _bigTriangle.bottomCenter;
+	pDC->MoveTo(p1.x, p1.y);
+	pDC->LineTo(p2.x, p2.y);
+	pDC->MoveTo(p2.x, p2.y);
+	pDC->LineTo(p3.x, p3.y);
+	pDC->MoveTo(p3.x, p3.y);
+	pDC->LineTo(p1.x, p1.y);
+
+	p1 = _middleTriangle.topLeft;
+	p2 = _middleTriangle.topRight;
+	p3 = _middleTriangle.bottomCenter;
+	pDC->MoveTo(p1.x, p1.y);
+	pDC->LineTo(p2.x, p2.y);
+	pDC->MoveTo(p2.x, p2.y);
+	pDC->LineTo(p3.x, p3.y);
+	pDC->MoveTo(p3.x, p3.y);
+	pDC->LineTo(p1.x, p1.y);
+
+	p1 = _smallTriangle.topLeft;
+	p2 = _smallTriangle.topRight;
+	p3 = _smallTriangle.bottomCenter;
+	pDC->MoveTo(p1.x, p1.y);
+	pDC->LineTo(p2.x, p2.y);
+	pDC->MoveTo(p2.x, p2.y);
+	pDC->LineTo(p3.x, p3.y);
+	pDC->MoveTo(p3.x, p3.y);
+	pDC->LineTo(p1.x, p1.y);
+
+	pDC->SelectStockObject(NULL_BRUSH);
+
+	pDC->Pie(_pie1,
+		CPoint(_pie1.right, _pie1.CenterPoint().y),
+		CPoint(_pie1.left, _pie1.CenterPoint().y));
+	pDC->Pie(_pie2,
+		CPoint(_pie2.right, _pie2.CenterPoint().y),
+		CPoint(_pie2.left, _pie2.CenterPoint().y));
+	pDC->Pie(_pie3,
+		CPoint(_pie3.right, _pie3.CenterPoint().y),
+		CPoint(_pie3.left, _pie3.CenterPoint().y));
+	pDC->Pie(_pie4,
+		CPoint(_pie4.right, _pie4.CenterPoint().y),
+		CPoint(_pie4.left, _pie4.CenterPoint().y));
+
+    pDC->SelectObject(oldPen);
 
 	return true;
 }
