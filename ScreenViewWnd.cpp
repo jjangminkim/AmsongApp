@@ -205,8 +205,15 @@ CScreenViewWnd::CScreenViewWnd(CWnd* pParent /*=NULL*/)
 
 CScreenViewWnd::~CScreenViewWnd()
 {
-	if (_bmpCanvas.GetSafeHandle()) _bmpCanvas.DeleteObject();
-	if (_fontText.GetSafeHandle())  _fontText.DeleteObject();
+	if (_bmpCanvas.GetSafeHandle()) {
+		_bmpCanvas.DeleteObject();
+	}
+	if (_fontText.GetSafeHandle()) {
+		_fontText.DeleteObject();
+	}
+	if (_bmpGuideCanvas.GetSafeHandle()) {
+		_bmpGuideCanvas.DeleteObject();
+	}
 
 	SAFE_DELETE_ARRAY(_cameraView);
 	SAFE_DELETE_ARRAY(_imageBuffer);
@@ -244,6 +251,9 @@ BOOL CScreenViewWnd::OnInitDialog()
 	_bmpCanvas.CreateCompatibleBitmap(&CClientDC(this),
 									  _rectScreen.Width(),
 									  _rectScreen.Height());
+	_bmpGuideCanvas.CreateCompatibleBitmap(&CClientDC(this),
+										   _rectScreen.Width(),
+										   _rectScreen.Height());
 
 	memset(&_bmpInfohead, 0x00, sizeof(_bmpInfohead));
 	_bmpInfohead.biSize          = sizeof(_bmpInfohead);
@@ -283,6 +293,9 @@ void CScreenViewWnd::OnDestroy()
 
 	if (_bmpCanvas.GetSafeHandle()) {
 		_bmpCanvas.DeleteObject();
+	}
+	if (_bmpGuideCanvas.GetSafeHandle()) {
+		_bmpGuideCanvas.DeleteObject();
 	}
 
 	::DrawDibClose(_hDrawDib);
@@ -328,8 +341,8 @@ void CScreenViewWnd::saveImage(TCHAR* path)
           bch.bcSize=sizeof(bch);
           bch.bcPlanes=1;
           bch.bcBitCount=24;
-          bch.bcWidth=bm.bmWidth;
-          bch.bcHeight=bm.bmHeight;
+          bch.bcWidth=static_cast<WORD>(bm.bmWidth);
+          bch.bcHeight=static_cast<WORD>(bm.bmHeight);
           fwrite(&bfh, 1, sizeof(bfh), fp);
           fwrite(&bch, 1, sizeof(bch), fp);
           for (int i=0;i<bm.bmHeight;i++) {
@@ -386,6 +399,10 @@ void CScreenViewWnd::saveOriginalImage(TCHAR* path)
          delete pBitmaps;
      }
      return;
+}
+
+void CScreenViewWnd::saveGuideImage(TCHAR* path)
+{
 }
 
 void CScreenViewWnd::cpatureImage(BYTE* data, int size)
@@ -698,9 +715,9 @@ bool CScreenViewWnd::drawObjects(CDC *pDC)
     CPen* oldPen = pDC->SelectObject(&pen);
 
 	// 삼각형 그리기.
-	Point p1 = _bigTriangle.topLeft;
-	Point p2 = _bigTriangle.topRight;
-	Point p3 = _bigTriangle.bottomCenter;
+	Amsong::Point p1 = _bigTriangle.topLeft;
+	Amsong::Point p2 = _bigTriangle.topRight;
+	Amsong::Point p3 = _bigTriangle.bottomCenter;
 	pDC->MoveTo(p1.x, p1.y);
 	pDC->LineTo(p2.x, p2.y);
 	pDC->MoveTo(p2.x, p2.y);
@@ -739,13 +756,67 @@ bool CScreenViewWnd::drawObjects(CDC *pDC)
 	pDC->Pie(_pie3,
 		CPoint(_pie3.right, _pie3.CenterPoint().y),
 		CPoint(_pie3.left, _pie3.CenterPoint().y));
-	pDC->Pie(_pie4,
-		CPoint(_pie4.right, _pie4.CenterPoint().y),
-		CPoint(_pie4.left, _pie4.CenterPoint().y));
 
-    pDC->SelectObject(oldPen);
+	// 원 찾은 점 그리기
+	pDC->SelectStockObject(WHITE_BRUSH);
+	if ((0 != _hitPoint.x) && (0 != _hitPoint.y)) {
+		int scale = 8;
+		pDC->Ellipse(_hitPoint.x - scale, _hitPoint.y - scale,
+					 _hitPoint.x + scale, _hitPoint.y + scale);
+	}
+
+	pDC->SelectObject(oldPen);
 
 	return true;
+}
+
+bool CScreenViewWnd::drawGuideImage()
+{
+	return true;
+}
+
+void CScreenViewWnd::moveAllGuidelineshorizontally(int steps)
+{
+	_bigTriangle.bottomCenter.x += steps;
+	_bigTriangle.topLeft.x += steps;
+	_bigTriangle.topRight.x += steps;
+
+	_middleTriangle.bottomCenter.x += steps;
+	_middleTriangle.topLeft.x += steps;
+	_middleTriangle.topRight.x += steps;
+
+	_smallTriangle.bottomCenter.x += steps;
+	_smallTriangle.topLeft.x += steps;
+	_smallTriangle.topRight.x += steps;
+
+	_pie1.left += steps;
+	_pie1.right += steps;
+	_pie2.left += steps;
+	_pie2.right += steps;
+	_pie3.left += steps;
+	_pie3.right += steps;
+}
+
+void CScreenViewWnd::moveAllGuidelinesVertically(int steps)
+{
+	_bigTriangle.bottomCenter.y += steps;
+	_bigTriangle.topLeft.y += steps;
+	_bigTriangle.topRight.y += steps;
+
+	_middleTriangle.bottomCenter.y += steps;
+	_middleTriangle.topLeft.y += steps;
+	_middleTriangle.topRight.y += steps;
+
+	_smallTriangle.bottomCenter.y += steps;
+	_smallTriangle.topLeft.y += steps;
+	_smallTriangle.topRight.y += steps;
+
+	_pie1.top += steps;
+	_pie1.bottom += steps;
+	_pie2.top += steps;
+	_pie2.bottom += steps;
+	_pie3.top += steps;
+	_pie3.bottom += steps;
 }
 
 void CScreenViewWnd::imageAspectRatio(int cx, int cy, const CRect& rctin, CRect& rctout)

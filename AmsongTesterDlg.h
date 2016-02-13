@@ -47,6 +47,17 @@ protected:
 
     CListBox _logList;
 
+private:
+	int _moveGuidelineSize;
+
+	Amsong::Triangle _bigTriangle;
+	Amsong::Triangle _middleTriangle;
+	Amsong::Triangle _smallTriangle;
+
+	CRect _pie1;
+	CRect _pie2;
+	CRect _pie3;
+
 public:
 	static CAmsongTesterDlg* _lpOwnerWnd;
 
@@ -69,6 +80,10 @@ protected:
     void captureImage();
 	void insertObjects();
 	void saveObjects();
+
+	void setPointToEditBox();
+	void moveAllGuidelineshorizontally(int steps);
+	void moveAllGuidelinesVertically(int steps);
 
 public:
     afx_msg void OnBnClickedButtonConnect();
@@ -94,7 +109,10 @@ public:
 	friend void IDISCALLBACK watch_statusLoaded(IDISHWATCH hWatch, IDISWPARAM wParam, IDISLPARAM lParam);
     friend void IDISCALLBACK watch_deviceStatusLoaded(IDISHWATCH hWatch, IDISWPARAM wParam, IDISLPARAM lParam);
 
-	//IDC_BUTTON_LINE_SAVE
+	afx_msg void OnBnClickedButtonMoveAllLeft();
+	afx_msg void OnBnClickedButtonMoveAllUp();
+	afx_msg void OnBnClickedButtonMoveAllDown();
+	afx_msg void OnBnClickedButtonMoveAllRight();
 };
 
 #endif  // _AMSONG_TESTER_DLG_H

@@ -45,6 +45,7 @@ CAmsongTesterDlg::CAmsongTesterDlg(CWnd* pParent /*=NULL*/)
     , _appStatus(APP_STATUS_DISCONNECTED)
 	, _captureDelayedMilisec(0)
 	, _eventOccurredTick(0)
+	, _moveGuidelineSize(1)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
     
@@ -75,6 +76,10 @@ BEGIN_MESSAGE_MAP(CAmsongTesterDlg, CDialog)
 	ON_BN_CLICKED(IDC_BUTTON_LINE_APPLY, &CAmsongTesterDlg::OnBnClickedButtonLineApply)
 	ON_BN_CLICKED(IDC_BUTTON_LINE_SAVE, &CAmsongTesterDlg::OnBnClickedButtonLineSave)
 	ON_BN_CLICKED(IDC_BUTTON_SAVE_IMAGE, &CAmsongTesterDlg::OnBnClickedButtonSaveImage)
+	ON_BN_CLICKED(IDC_BUTTON_MOVE_ALL_LEFT, &CAmsongTesterDlg::OnBnClickedButtonMoveAllLeft)
+	ON_BN_CLICKED(IDC_BUTTON_MOVE_ALL_UP, &CAmsongTesterDlg::OnBnClickedButtonMoveAllUp)
+	ON_BN_CLICKED(IDC_BUTTON_MOVE_ALL_DOWN, &CAmsongTesterDlg::OnBnClickedButtonMoveAllDown)
+	ON_BN_CLICKED(IDC_BUTTON_MOVE_ALL_RIGHT, &CAmsongTesterDlg::OnBnClickedButtonMoveAllRight)
 END_MESSAGE_MAP()
 
 // watchSDK callback function ///////////////////////////////////////////////
@@ -285,6 +290,7 @@ BOOL CAmsongTesterDlg::OnInitDialog()
     _lpOwnerWnd = this;
     _fDisconnectByMe = false;
 	_enableEvent = true;
+	_moveGuidelineSize = 1;
 
     // Init Controls
     setAppStatus(APP_STATUS_DISCONNECTED);
@@ -367,15 +373,6 @@ BOOL CAmsongTesterDlg::OnInitDialog()
 	SetDlgItemText(IDC_EDIT_C3_P1_Y, p1_y);
 	SetDlgItemText(IDC_EDIT_C3_P2_X, p2_x);
 	SetDlgItemText(IDC_EDIT_C3_P2_Y, p2_y);
-
-	p1_x = theApp.GetProfileString(L"AMSONG_APP", L"C4_P1_X", L"540");
-	p1_y = theApp.GetProfileString(L"AMSONG_APP", L"C4_P1_Y", L"320");
-	p2_x = theApp.GetProfileString(L"AMSONG_APP", L"C4_P2_X", L"740");
-	p2_y = theApp.GetProfileString(L"AMSONG_APP", L"C4_P2_Y", L"400");
-	SetDlgItemText(IDC_EDIT_C4_P1_X, p1_x);
-	SetDlgItemText(IDC_EDIT_C4_P1_Y, p1_y);
-	SetDlgItemText(IDC_EDIT_C4_P2_X, p2_x);
-	SetDlgItemText(IDC_EDIT_C4_P2_Y, p2_y);
 
 	CRect thisRect;
 	this->GetWindowRect(&thisRect);
@@ -521,6 +518,9 @@ void CAmsongTesterDlg::captureImage()
     _screen.cpatureImage(_capturedImage, imageSize);
     _imageProcessor.setCapturedImage(_capturedImage, imageSize, imageWidth, imageHeight);
 
+	Amsong::Point hitPoint = _imageProcessor.detectCircle();
+	_screen.setHitPoint(hitPoint);
+
     if (_capturedImage) {
         delete _capturedImage;
         _capturedImage = 0;
@@ -541,10 +541,10 @@ void CAmsongTesterDlg::insertObjects()
 	GetDlgItemText(IDC_EDIT_T1_P2_Y, p2_y);
 	GetDlgItemText(IDC_EDIT_T1_P3_X, p3_x);
 	GetDlgItemText(IDC_EDIT_T1_P3_Y, p3_y);
-	Triangle bigTriangle(
-		Point(_ttoi(p1_x), _ttoi(p1_y)),
-		Point(_ttoi(p2_x), _ttoi(p2_y)),
-		Point(_ttoi(p3_x), _ttoi(p3_y)));
+	_bigTriangle = Amsong::Triangle(
+		Amsong::Point(_ttoi(p1_x), _ttoi(p1_y)),
+		Amsong::Point(_ttoi(p2_x), _ttoi(p2_y)),
+		Amsong::Point(_ttoi(p3_x), _ttoi(p3_y)));
 
 	GetDlgItemText(IDC_EDIT_T2_P1_X, p1_x);
 	GetDlgItemText(IDC_EDIT_T2_P1_Y, p1_y);
@@ -552,10 +552,10 @@ void CAmsongTesterDlg::insertObjects()
 	GetDlgItemText(IDC_EDIT_T2_P2_Y, p2_y);
 	GetDlgItemText(IDC_EDIT_T2_P3_X, p3_x);
 	GetDlgItemText(IDC_EDIT_T2_P3_Y, p3_y);
-	Triangle middleTriangle(
-		Point(_ttoi(p1_x), _ttoi(p1_y)),
-		Point(_ttoi(p2_x), _ttoi(p2_y)),
-		Point(_ttoi(p3_x), _ttoi(p3_y)));
+	_middleTriangle = Amsong::Triangle(
+		Amsong::Point(_ttoi(p1_x), _ttoi(p1_y)),
+		Amsong::Point(_ttoi(p2_x), _ttoi(p2_y)),
+		Amsong::Point(_ttoi(p3_x), _ttoi(p3_y)));
 
 	GetDlgItemText(IDC_EDIT_T3_P1_X, p1_x);
 	GetDlgItemText(IDC_EDIT_T3_P1_Y, p1_y);
@@ -563,39 +563,33 @@ void CAmsongTesterDlg::insertObjects()
 	GetDlgItemText(IDC_EDIT_T3_P2_Y, p2_y);
 	GetDlgItemText(IDC_EDIT_T3_P3_X, p3_x);
 	GetDlgItemText(IDC_EDIT_T3_P3_Y, p3_y);
-	Triangle smallTriangle(
-		Point(_ttoi(p1_x), _ttoi(p1_y)),
-		Point(_ttoi(p2_x), _ttoi(p2_y)),
-		Point(_ttoi(p3_x), _ttoi(p3_y)));
+	_smallTriangle = Amsong::Triangle(
+		Amsong::Point(_ttoi(p1_x), _ttoi(p1_y)),
+		Amsong::Point(_ttoi(p2_x), _ttoi(p2_y)),
+		Amsong::Point(_ttoi(p3_x), _ttoi(p3_y)));
 
 	GetDlgItemText(IDC_EDIT_C1_P1_X, p1_x);
 	GetDlgItemText(IDC_EDIT_C1_P1_Y, p1_y);
 	GetDlgItemText(IDC_EDIT_C1_P2_X, p2_x);
 	GetDlgItemText(IDC_EDIT_C1_P2_Y, p2_y);
-	CRect pie1(_ttoi(p1_x), _ttoi(p1_y), _ttoi(p2_x), _ttoi(p2_y));
+	_pie1 = CRect(_ttoi(p1_x), _ttoi(p1_y), _ttoi(p2_x), _ttoi(p2_y));
 
 	GetDlgItemText(IDC_EDIT_C2_P1_X, p1_x);
 	GetDlgItemText(IDC_EDIT_C2_P1_Y, p1_y);
 	GetDlgItemText(IDC_EDIT_C2_P2_X, p2_x);
 	GetDlgItemText(IDC_EDIT_C2_P2_Y, p2_y);
-	CRect pie2(_ttoi(p1_x), _ttoi(p1_y), _ttoi(p2_x), _ttoi(p2_y));
+	_pie2 = CRect(_ttoi(p1_x), _ttoi(p1_y), _ttoi(p2_x), _ttoi(p2_y));
 
 	GetDlgItemText(IDC_EDIT_C3_P1_X, p1_x);
 	GetDlgItemText(IDC_EDIT_C3_P1_Y, p1_y);
 	GetDlgItemText(IDC_EDIT_C3_P2_X, p2_x);
 	GetDlgItemText(IDC_EDIT_C3_P2_Y, p2_y);
-	CRect pie3(_ttoi(p1_x), _ttoi(p1_y), _ttoi(p2_x), _ttoi(p2_y));
+	_pie3 = CRect(_ttoi(p1_x), _ttoi(p1_y), _ttoi(p2_x), _ttoi(p2_y));
 
-	GetDlgItemText(IDC_EDIT_C4_P1_X, p1_x);
-	GetDlgItemText(IDC_EDIT_C4_P1_Y, p1_y);
-	GetDlgItemText(IDC_EDIT_C4_P2_X, p2_x);
-	GetDlgItemText(IDC_EDIT_C4_P2_Y, p2_y);
-	CRect pie4(_ttoi(p1_x), _ttoi(p1_y), _ttoi(p2_x), _ttoi(p2_y));
-
-	_screen.setBigTriangle(bigTriangle);
-	_screen.setMiddleTriangle(middleTriangle);
-	_screen.setSmallTriangle(smallTriangle);
-	_screen.setPies(pie1, pie2, pie3, pie4);
+	_screen.setBigTriangle(_bigTriangle);
+	_screen.setMiddleTriangle(_middleTriangle);
+	_screen.setSmallTriangle(_smallTriangle);
+	_screen.setPies(_pie1, _pie2, _pie3);
 }
 
 void CAmsongTesterDlg::saveObjects()
@@ -672,17 +666,134 @@ void CAmsongTesterDlg::saveObjects()
 	theApp.WriteProfileStringW(L"AMSONG_APP", L"C3_P1_Y", p1_y);
 	theApp.WriteProfileStringW(L"AMSONG_APP", L"C3_P2_X", p2_x);
 	theApp.WriteProfileStringW(L"AMSONG_APP", L"C3_P2_Y", p2_y);
-	
-	GetDlgItemText(IDC_EDIT_C4_P1_X, p1_x);
-	GetDlgItemText(IDC_EDIT_C4_P1_Y, p1_y);
-	GetDlgItemText(IDC_EDIT_C4_P2_X, p2_x);
-	GetDlgItemText(IDC_EDIT_C4_P2_Y, p2_y);
-	theApp.WriteProfileStringW(L"AMSONG_APP", L"C4_P1_X", p1_x);
-	theApp.WriteProfileStringW(L"AMSONG_APP", L"C4_P1_Y", p1_y);
-	theApp.WriteProfileStringW(L"AMSONG_APP", L"C4_P2_X", p2_x);
-	theApp.WriteProfileStringW(L"AMSONG_APP", L"C4_P2_Y", p2_y);
-	
+}
 
+void CAmsongTesterDlg::setPointToEditBox()
+{
+	CString temp;
+	temp.Format(_T("%d"), _bigTriangle.topLeft.x);
+	SetDlgItemText(IDC_EDIT_T1_P1_X, temp);
+	temp.Format(_T("%d"), _bigTriangle.topLeft.y);
+	SetDlgItemText(IDC_EDIT_T1_P1_Y, temp);
+	temp.Format(_T("%d"), _bigTriangle.topRight.x);
+	SetDlgItemText(IDC_EDIT_T1_P2_X, temp);
+	temp.Format(_T("%d"), _bigTriangle.topRight.y);
+	SetDlgItemText(IDC_EDIT_T1_P2_Y, temp);
+	temp.Format(_T("%d"), _bigTriangle.bottomCenter.x);
+	SetDlgItemText(IDC_EDIT_T1_P3_X, temp);
+	temp.Format(_T("%d"), _bigTriangle.bottomCenter.y);
+	SetDlgItemText(IDC_EDIT_T1_P3_Y, temp);
+
+	temp.Format(_T("%d"), _middleTriangle.topLeft.x);
+	SetDlgItemText(IDC_EDIT_T2_P1_X, temp);
+	temp.Format(_T("%d"), _middleTriangle.topLeft.y);
+	SetDlgItemText(IDC_EDIT_T2_P1_Y, temp);
+	temp.Format(_T("%d"), _middleTriangle.topRight.x);
+	SetDlgItemText(IDC_EDIT_T2_P2_X, temp);
+	temp.Format(_T("%d"), _middleTriangle.topRight.y);
+	SetDlgItemText(IDC_EDIT_T2_P2_Y, temp);
+	temp.Format(_T("%d"), _middleTriangle.bottomCenter.x);
+	SetDlgItemText(IDC_EDIT_T2_P3_X, temp);
+	temp.Format(_T("%d"), _middleTriangle.bottomCenter.y);
+	SetDlgItemText(IDC_EDIT_T2_P3_Y, temp);
+
+	temp.Format(_T("%d"), _smallTriangle.topLeft.x);
+	SetDlgItemText(IDC_EDIT_T3_P1_X, temp);
+	temp.Format(_T("%d"), _smallTriangle.topLeft.y);
+	SetDlgItemText(IDC_EDIT_T3_P1_Y, temp);
+	temp.Format(_T("%d"), _smallTriangle.topRight.x);
+	SetDlgItemText(IDC_EDIT_T3_P2_X, temp);
+	temp.Format(_T("%d"), _smallTriangle.topRight.y);
+	SetDlgItemText(IDC_EDIT_T3_P2_Y, temp);
+	temp.Format(_T("%d"), _smallTriangle.bottomCenter.x);
+	SetDlgItemText(IDC_EDIT_T3_P3_X, temp);
+	temp.Format(_T("%d"), _smallTriangle.bottomCenter.y);
+	SetDlgItemText(IDC_EDIT_T3_P3_Y, temp);
+
+	temp.Format(_T("%d"), _pie1.left);
+	SetDlgItemText(IDC_EDIT_C1_P1_X, temp);
+	temp.Format(_T("%d"), _pie1.top);
+	SetDlgItemText(IDC_EDIT_C1_P1_Y, temp);
+	temp.Format(_T("%d"), _pie1.right);
+	SetDlgItemText(IDC_EDIT_C1_P2_X, temp);
+	temp.Format(_T("%d"), _pie1.bottom);
+	SetDlgItemText(IDC_EDIT_C1_P2_Y, temp);
+
+	temp.Format(_T("%d"), _pie2.left);
+	SetDlgItemText(IDC_EDIT_C2_P1_X, temp);
+	temp.Format(_T("%d"), _pie2.top);
+	SetDlgItemText(IDC_EDIT_C2_P1_Y, temp);
+	temp.Format(_T("%d"), _pie2.right);
+	SetDlgItemText(IDC_EDIT_C2_P2_X, temp);
+	temp.Format(_T("%d"), _pie2.bottom);
+	SetDlgItemText(IDC_EDIT_C2_P2_Y, temp);
+
+	temp.Format(_T("%d"), _pie3.left);
+	SetDlgItemText(IDC_EDIT_C3_P1_X, temp);
+	temp.Format(_T("%d"), _pie3.top);
+	SetDlgItemText(IDC_EDIT_C3_P1_Y, temp);
+	temp.Format(_T("%d"), _pie3.right);
+	SetDlgItemText(IDC_EDIT_C3_P2_X, temp);
+	temp.Format(_T("%d"), _pie3.bottom);
+	SetDlgItemText(IDC_EDIT_C3_P2_Y, temp);
+}
+
+void CAmsongTesterDlg::moveAllGuidelineshorizontally(int steps)
+{
+	_bigTriangle.bottomCenter.x += steps;
+	_bigTriangle.topLeft.x += steps;
+	_bigTriangle.topRight.x += steps;
+
+	_middleTriangle.bottomCenter.x += steps;
+	_middleTriangle.topLeft.x += steps;
+	_middleTriangle.topRight.x += steps;
+
+	_smallTriangle.bottomCenter.x += steps;
+	_smallTriangle.topLeft.x += steps;
+	_smallTriangle.topRight.x += steps;
+
+	_pie1.left += steps;
+	_pie1.right += steps;
+	_pie2.left += steps;
+	_pie2.right += steps;
+	_pie3.left += steps;
+	_pie3.right += steps;
+
+	setPointToEditBox();
+
+	_screen.setBigTriangle(_bigTriangle);
+	_screen.setMiddleTriangle(_middleTriangle);
+	_screen.setSmallTriangle(_smallTriangle);
+	_screen.setPies(_pie1, _pie2, _pie3);
+}
+
+void CAmsongTesterDlg::moveAllGuidelinesVertically(int steps)
+{
+	_bigTriangle.bottomCenter.y += steps;
+	_bigTriangle.topLeft.y += steps;
+	_bigTriangle.topRight.y += steps;
+
+	_middleTriangle.bottomCenter.y += steps;
+	_middleTriangle.topLeft.y += steps;
+	_middleTriangle.topRight.y += steps;
+
+	_smallTriangle.bottomCenter.y += steps;
+	_smallTriangle.topLeft.y += steps;
+	_smallTriangle.topRight.y += steps;
+
+	_pie1.top += steps;
+	_pie1.bottom += steps;
+	_pie2.top += steps;
+	_pie2.bottom += steps;
+	_pie3.top += steps;
+	_pie3.bottom += steps;
+
+	setPointToEditBox();
+
+	_screen.setBigTriangle(_bigTriangle);
+	_screen.setMiddleTriangle(_middleTriangle);
+	_screen.setSmallTriangle(_smallTriangle);
+	_screen.setPies(_pie1, _pie2, _pie3);
 }
 
 void CAmsongTesterDlg::OnBnClickedButtonConnect()
@@ -884,4 +995,28 @@ void CAmsongTesterDlg::OnBnClickedButtonLineSave()
 void CAmsongTesterDlg::OnBnClickedButtonSaveImage()
 {
 	_screen.saveImage(_T("savedImage.bmp"));
+}
+
+
+void CAmsongTesterDlg::OnBnClickedButtonMoveAllLeft()
+{
+	moveAllGuidelineshorizontally(_moveGuidelineSize * (-1));
+}
+
+
+void CAmsongTesterDlg::OnBnClickedButtonMoveAllUp()
+{
+	moveAllGuidelinesVertically(_moveGuidelineSize * (-1));
+}
+
+
+void CAmsongTesterDlg::OnBnClickedButtonMoveAllDown()
+{
+	moveAllGuidelinesVertically(_moveGuidelineSize);
+}
+
+
+void CAmsongTesterDlg::OnBnClickedButtonMoveAllRight()
+{
+	moveAllGuidelineshorizontally(_moveGuidelineSize);
 }

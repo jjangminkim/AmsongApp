@@ -167,6 +167,7 @@ private:
 	IDISHDECODER		_hDecoder;
 	HDRAWDIB			_hDrawDib;
 	CBitmap				_bmpCanvas;
+	CBitmap				_bmpGuideCanvas;
 	BITMAPINFOHEADER	_bmpInfohead;
 	CCriticalSection	_sync_drawing;
 
@@ -187,14 +188,16 @@ private:
 	bool				_fuse1x1Mode;
 	bool				_fuseAspectRatio;
 
-	Triangle _bigTriangle;
-	Triangle _middleTriangle;
-	Triangle _smallTriangle;
+private:
+	Amsong::Triangle _bigTriangle;
+	Amsong::Triangle _middleTriangle;
+	Amsong::Triangle _smallTriangle;
 
 	CRect _pie1;
 	CRect _pie2;
 	CRect _pie3;
-	CRect _pie4;
+
+	Amsong::Point _hitPoint;
 
 // Getter, Setter
 public:
@@ -202,10 +205,11 @@ public:
     int imageHeight() { return _imageHeight; }
     int imageSize()   { return _imageWidth * _imageHeight * 4; }
 
-	void setBigTriangle(const Triangle& triangle) { _bigTriangle = triangle; }
-	void setMiddleTriangle(const Triangle& triangle) { _middleTriangle = triangle; }
-	void setSmallTriangle(const Triangle& triangle) { _smallTriangle = triangle; }
-	void setPies(const CRect& pie1, const CRect& pie2, const CRect& pie3, const CRect& pie4);
+	void setBigTriangle(const Amsong::Triangle& triangle) { _bigTriangle = triangle; }
+	void setMiddleTriangle(const Amsong::Triangle& triangle) { _middleTriangle = triangle; }
+	void setSmallTriangle(const Amsong::Triangle& triangle) { _smallTriangle = triangle; }
+	void setPies(const CRect& pie1, const CRect& pie2, const CRect& pie3);
+	void setHitPoint(const Amsong::Point& point) { _hitPoint = point; }
 
 // Operations
 public:
@@ -225,9 +229,15 @@ public:
 						COLORREF clrBack = RGB(0, 0, 0));
 	bool drawObjects(CDC *pDC);
 
+	bool drawGuideImage();
+
+	void moveAllGuidelineshorizontally(int steps);
+	void moveAllGuidelinesVertically(int steps);
+
 	void imageAspectRatio(int cx, int cy, const CRect& rctin, CRect& rctout);
     void saveImage(TCHAR* path);
     void saveOriginalImage(TCHAR* path);
+	void saveGuideImage(TCHAR* path);
     void cpatureImage(BYTE* data, int size);
 
 	void updateStatus(int camera);
@@ -287,12 +297,11 @@ protected:
 
 //////////////////////////////////////////////////////////////////////////
 
-inline void CScreenViewWnd::setPies(const CRect& pie1, const CRect& pie2, const CRect& pie3, const CRect& pie4)
+inline void CScreenViewWnd::setPies(const CRect& pie1, const CRect& pie2, const CRect& pie3)
 {
 	_pie1 = pie1;
 	_pie2 = pie2;
 	_pie3 = pie3;
-	_pie4 = pie4;
 }
 
 inline bool CScreenViewWnd::putLoadedFrame(const PARAMWS_FRAMEINFO& rFrame)
