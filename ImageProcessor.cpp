@@ -30,6 +30,9 @@ void ImageProcessor::setCapturedImage(BYTE* _data, int size, int width, int heig
 	Mat cpaturedImage(height, width, CV_8UC4, _data);
     _cpaturedImage = cpaturedImage.clone();
 	flip(_cpaturedImage, _cpaturedImage, 0);
+	
+	ImageProcessor::detectCircle();
+
 }
 
 Amsong::Point ImageProcessor::detectCircle()
@@ -47,10 +50,17 @@ Amsong::Point ImageProcessor::detectCircle()
 
 	// masks
 	CvMat* mask = cvCreateMat(cvSize.height, cvSize.width, CV_8UC1);
+	// color filter, B, G, R 순으로 해야 함.
 	//cvInRangeS(hsv, cvScalar(15, 60, 255, 0),
 	//                cvScalar(30, 186, 255, 0), mask);
-	cvInRangeS(hsv, cvScalar(12, 60, 249, 0),
-	                cvScalar(30, 186, 255, 0), mask);
+	// 주황색 탁구공
+	/*cvInRangeS(hsv, cvScalar(12, 60, 249, 0),
+	                cvScalar(30, 186, 255, 0), mask);*/
+	cvInRangeS(hsv, cvScalar(0, 140, 170, 0),
+	                cvScalar(30, 180, 240, 0), mask);
+	// 테니스공은 다시 찾아보자.
+	//cvInRangeS(hsv, cvScalar(43, 114, 141, 0),
+	//                cvScalar(38, 84, 100, 0), mask);
 	cvReleaseImage(&hsv);
 
 	Mat masked(mask);
@@ -99,9 +109,26 @@ Amsong::Point ImageProcessor::detectCircle()
 	}
 
 	Mat res(iplImage_img);
-	//imshow("result", res);
+	imshow("result", res);
 
 	cvReleaseMemStorage(&storage);
 
 	return centerOfCircle;
+}
+
+COLORREF ImageProcessor::getColorOfPointFromReferImage(Amsong::Point hitPoint)
+{
+	Mat referImage = imread("refer.bmp");
+	IplImage* iplReferImage = new IplImage(referImage);
+
+	unsigned char red, green, blue;
+	red = green = blue = 0;
+
+	int index = (hitPoint.y * iplReferImage->widthStep) + (hitPoint.x * 3);
+	red = iplReferImage->imageData[index + 2];
+	green = iplReferImage->imageData[index + 1];
+	blue = iplReferImage->imageData[index];
+	COLORREF color = RGB(red, green, blue);
+
+	return color;
 }

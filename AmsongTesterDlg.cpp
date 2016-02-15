@@ -519,7 +519,41 @@ void CAmsongTesterDlg::captureImage()
     _imageProcessor.setCapturedImage(_capturedImage, imageSize, imageWidth, imageHeight);
 
 	Amsong::Point hitPoint = _imageProcessor.detectCircle();
+
+	// 디버그용 테스트.
+	//hitPoint.x = 640;
+	//hitPoint.y = 360;
+
 	_screen.setHitPoint(hitPoint);
+
+	if (0 != hitPoint.x && 0 != hitPoint.y) {
+		COLORREF colorOfHitPoint = _imageProcessor.getColorOfPointFromReferImage(hitPoint);
+		CString message;
+		
+		// 디버깅용 테스트.
+		COLORREF third	= RGB(237, 249, 0);
+		COLORREF second = RGB(0, 255, 6);
+		COLORREF first	= RGB(255, 182, 0);
+		COLORREF out	= RGB(53, 53, 53);
+
+		if (third == colorOfHitPoint) {
+			message = _T("3루타");
+		}
+		else if (second == colorOfHitPoint) {
+			message = _T("2루타");
+		}
+		else if (first == colorOfHitPoint) {
+			message = _T("1루타");
+		}
+		else if (out == colorOfHitPoint) {
+			message = _T("아웃");
+		}
+		else {
+			message = _T("스트라이크 또는 볼");
+		}
+
+		insertLog(message);
+	}
 
     if (_capturedImage) {
         delete _capturedImage;
