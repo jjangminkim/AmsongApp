@@ -80,6 +80,7 @@ BEGIN_MESSAGE_MAP(CAmsongTesterDlg, CDialog)
 	ON_BN_CLICKED(IDC_BUTTON_MOVE_ALL_UP, &CAmsongTesterDlg::OnBnClickedButtonMoveAllUp)
 	ON_BN_CLICKED(IDC_BUTTON_MOVE_ALL_DOWN, &CAmsongTesterDlg::OnBnClickedButtonMoveAllDown)
 	ON_BN_CLICKED(IDC_BUTTON_MOVE_ALL_RIGHT, &CAmsongTesterDlg::OnBnClickedButtonMoveAllRight)
+    ON_BN_CLICKED(IDC_BUTTON_SAVE_REFER_IMAGE, &CAmsongTesterDlg::OnBnClickedButtonSaveReferImage)
 END_MESSAGE_MAP()
 
 // watchSDK callback function ///////////////////////////////////////////////
@@ -1053,4 +1054,10 @@ void CAmsongTesterDlg::OnBnClickedButtonMoveAllDown()
 void CAmsongTesterDlg::OnBnClickedButtonMoveAllRight()
 {
 	moveAllGuidelineshorizontally(_moveGuidelineSize);
+}
+
+
+void CAmsongTesterDlg::OnBnClickedButtonSaveReferImage()
+{
+    _screen.saveReferImage(_T("ReferImage.bmp"));
 }

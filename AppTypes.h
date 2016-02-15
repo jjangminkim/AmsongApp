@@ -26,10 +26,10 @@ namespace Amsong {
 	} Triangle;
 
 	// COLOR DEFINES
-	const COLORREF COLOR_THIRD_BASE	= RGB(237, 249, 0);
-	const COLORREF COLOR_SECOND_BASE	= RGB(0, 255, 6);
-	const COLORREF COLOR_FIRST_BASE	= RGB(255, 182, 0);
-	const COLORREF COLOR_OUT			= RGB(53, 53, 53);
+	const COLORREF COLOR_THIRD_BASE  = RGB(237, 249, 0);
+	const COLORREF COLOR_SECOND_BASE = RGB(0, 255, 6);
+	const COLORREF COLOR_FIRST_BASE	 = RGB(255, 182, 0);
+	const COLORREF COLOR_OUT         = RGB(53, 53, 53);
 
 }	// namespace Amsong
 

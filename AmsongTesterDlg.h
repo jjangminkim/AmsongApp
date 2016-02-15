@@ -113,6 +113,7 @@ public:
 	afx_msg void OnBnClickedButtonMoveAllUp();
 	afx_msg void OnBnClickedButtonMoveAllDown();
 	afx_msg void OnBnClickedButtonMoveAllRight();
+    afx_msg void OnBnClickedButtonSaveReferImage();
 };
 
 #endif  // _AMSONG_TESTER_DLG_H

@@ -211,8 +211,8 @@ CScreenViewWnd::~CScreenViewWnd()
 	if (_fontText.GetSafeHandle()) {
 		_fontText.DeleteObject();
 	}
-	if (_bmpGuideCanvas.GetSafeHandle()) {
-		_bmpGuideCanvas.DeleteObject();
+	if (_bmpReferCanvas.GetSafeHandle()) {
+		_bmpReferCanvas.DeleteObject();
 	}
 
 	SAFE_DELETE_ARRAY(_cameraView);
@@ -251,7 +251,7 @@ BOOL CScreenViewWnd::OnInitDialog()
 	_bmpCanvas.CreateCompatibleBitmap(&CClientDC(this),
 									  _rectScreen.Width(),
 									  _rectScreen.Height());
-	_bmpGuideCanvas.CreateCompatibleBitmap(&CClientDC(this),
+	_bmpReferCanvas.CreateCompatibleBitmap(&CClientDC(this),
 										   _rectScreen.Width(),
 										   _rectScreen.Height());
 
@@ -294,8 +294,8 @@ void CScreenViewWnd::OnDestroy()
 	if (_bmpCanvas.GetSafeHandle()) {
 		_bmpCanvas.DeleteObject();
 	}
-	if (_bmpGuideCanvas.GetSafeHandle()) {
-		_bmpGuideCanvas.DeleteObject();
+	if (_bmpReferCanvas.GetSafeHandle()) {
+		_bmpReferCanvas.DeleteObject();
 	}
 
 	::DrawDibClose(_hDrawDib);
@@ -401,8 +401,49 @@ void CScreenViewWnd::saveOriginalImage(TCHAR* path)
      return;
 }
 
-void CScreenViewWnd::saveGuideImage(TCHAR* path)
+void CScreenViewWnd::saveReferImage(TCHAR* path)
 {
+    drawReferImage();
+
+    BITMAP bm;
+    GetObject(_bmpReferCanvas, sizeof(bm), &bm);
+
+    int pixel = bm.bmBitsPixel/8;
+    int bitmapsize = bm.bmWidth * bm.bmHeight * pixel;
+    BYTE *pBitmaps = (BYTE*)new BYTE[bitmapsize];
+    BYTE *pImg = pBitmaps;
+    _bmpReferCanvas.GetBitmapBits(bitmapsize, pBitmaps);
+    USES_CONVERSION;
+    FILE *fp = fopen(T2A(path), "w+b");
+    if (fp){
+          BITMAPFILEHEADER bfh;
+          BITMAPCOREHEADER bch;
+          memset(&bfh,0,sizeof(bfh));
+          memcpy(&bfh.bfType,"BM",2);
+          bfh.bfOffBits=sizeof(bch)+sizeof(bfh);
+          bfh.bfSize = sizeof(bfh)+sizeof(bch)+bm.bmWidth*(bm.bmHeight)*3;
+          memset(&bch,0,sizeof(bch));
+          bch.bcSize=sizeof(bch);
+          bch.bcPlanes=1;
+          bch.bcBitCount=24;
+          bch.bcWidth=static_cast<WORD>(bm.bmWidth);
+          bch.bcHeight=static_cast<WORD>(bm.bmHeight);
+          fwrite(&bfh, 1, sizeof(bfh), fp);
+          fwrite(&bch, 1, sizeof(bch), fp);
+          for (int i=0;i<bm.bmHeight;i++) {
+              pImg = pBitmaps + (bm.bmHeight-1-i)*bm.bmWidthBytes;
+              for (int j=0;j<bm.bmWidth;j++) {
+                  fwrite(pImg, 1, 3, fp);
+                  pImg+=pixel;
+                //fwrite(pImg, 1, m_nWidth*m_nHeight*3, fp);
+              };
+          };
+        fclose(fp);
+     };
+     if (pBitmaps) {
+         delete pBitmaps;
+     }
+     return;
 }
 
 void CScreenViewWnd::cpatureImage(BYTE* data, int size)
@@ -636,7 +677,7 @@ void CScreenViewWnd::drawImage(int camera,
 					  size.cx, size.cy,
 					  0);
 
-		drawObjects(&MemDC);
+		drawReferLines(&MemDC);
 
 		CRect rctOSD = rctDest;
 		rctOSD.DeflateRect(5, 2, 5, 3);
@@ -705,7 +746,7 @@ bool CScreenViewWnd::drawText(CDC *pDC,
 	return true;
 }
 
-bool CScreenViewWnd::drawObjects(CDC *pDC)
+bool CScreenViewWnd::drawReferLines(CDC *pDC)
 {
 	ASSERT(pDC != NULL);
 	if (pDC->GetSafeHdc() == NULL) return false;
@@ -770,8 +811,129 @@ bool CScreenViewWnd::drawObjects(CDC *pDC)
 	return true;
 }
 
-bool CScreenViewWnd::drawGuideImage()
+bool CScreenViewWnd::drawReferImage()
 {
+    CDC* parentDC = GetDC();
+
+    CMemDC MemDC;
+	ASSERT(_bmpReferCanvas.m_hObject);
+	MemDC.CreateDC(parentDC, &_bmpReferCanvas);
+
+    CDC* pDC = &MemDC;
+
+    pDC->PatBlt(0, 0, _imageWidth, _imageHeight, WHITENESS);
+
+	//CPen pen;
+ //   pen.CreatePen(PS_NULL, 0, RGB(0, 0, 0));
+ //   CPen* oldPen = pDC->SelectObject(&pen);
+
+	// 삼각형 그리기.
+    CBrush brush;
+    brush.CreateSolidBrush(Amsong::COLOR_THIRD_BASE);
+	CBrush* oldBrush = pDC->SelectObject(&brush);
+    CPen pen;
+    pen.CreatePen(PS_SOLID, 1, Amsong::COLOR_THIRD_BASE);
+    CPen* oldPen = pDC->SelectObject(&pen);
+	Amsong::Point p1 = _bigTriangle.topLeft;
+	Amsong::Point p2 = _bigTriangle.topRight;
+	Amsong::Point p3 = _bigTriangle.bottomCenter;
+    POINT triPoints[3];
+    triPoints[0].x = _bigTriangle.topLeft.x;
+    triPoints[0].y = _bigTriangle.topLeft.y;
+    triPoints[1].x = _bigTriangle.topRight.x;
+    triPoints[1].y = _bigTriangle.topRight.y;
+    triPoints[2].x = _bigTriangle.bottomCenter.x;
+    triPoints[2].y = _bigTriangle.bottomCenter.y;
+    pDC->Polygon(triPoints, 3);
+    pDC->SelectObject(oldPen);
+    pen.DeleteObject();
+    pDC->SelectObject(oldBrush);
+    brush.DeleteObject();
+
+    brush.CreateSolidBrush(Amsong::COLOR_SECOND_BASE);
+	oldBrush = pDC->SelectObject(&brush);
+    pen.CreatePen(PS_SOLID, 1, Amsong::COLOR_SECOND_BASE);
+    oldPen = pDC->SelectObject(&pen);
+	p1 = _middleTriangle.topLeft;
+	p2 = _middleTriangle.topRight;
+	p3 = _middleTriangle.bottomCenter;
+    triPoints[0].x = _middleTriangle.topLeft.x;
+    triPoints[0].y = _middleTriangle.topLeft.y;
+    triPoints[1].x = _middleTriangle.topRight.x;
+    triPoints[1].y = _middleTriangle.topRight.y;
+    triPoints[2].x = _middleTriangle.bottomCenter.x;
+    triPoints[2].y = _middleTriangle.bottomCenter.y;
+    pDC->Polygon(triPoints, 3);
+    pDC->SelectObject(oldPen);
+    pen.DeleteObject();
+    pDC->SelectObject(oldBrush);
+    brush.DeleteObject();
+
+    brush.CreateSolidBrush(Amsong::COLOR_FIRST_BASE);
+	oldBrush = pDC->SelectObject(&brush);
+    pen.CreatePen(PS_SOLID, 1, Amsong::COLOR_FIRST_BASE);
+    oldPen = pDC->SelectObject(&pen);
+	p1 = _smallTriangle.topLeft;
+	p2 = _smallTriangle.topRight;
+	p3 = _smallTriangle.bottomCenter;
+    triPoints[0].x = _smallTriangle.topLeft.x;
+    triPoints[0].y = _smallTriangle.topLeft.y;
+    triPoints[1].x = _smallTriangle.topRight.x;
+    triPoints[1].y = _smallTriangle.topRight.y;
+    triPoints[2].x = _smallTriangle.bottomCenter.x;
+    triPoints[2].y = _smallTriangle.bottomCenter.y;
+    pDC->Polygon(triPoints, 3);
+    pDC->SelectObject(oldPen);
+    pen.DeleteObject();
+    pDC->SelectObject(oldBrush);
+    brush.DeleteObject();
+
+    brush.CreateSolidBrush(Amsong::COLOR_THIRD_BASE);
+	oldBrush = pDC->SelectObject(&brush);
+    pen.CreatePen(PS_SOLID, 1, Amsong::COLOR_THIRD_BASE);
+    oldPen = pDC->SelectObject(&pen);
+	pDC->Pie(_pie1,
+		CPoint(_pie1.right, _pie1.CenterPoint().y),
+		CPoint(_pie1.left, _pie1.CenterPoint().y));
+    pDC->SelectObject(oldPen);
+    pen.DeleteObject();
+    pDC->SelectObject(oldBrush);
+    brush.DeleteObject();
+
+    brush.CreateSolidBrush(Amsong::COLOR_SECOND_BASE);
+    oldBrush = pDC->SelectObject(&brush);
+    pen.CreatePen(PS_SOLID, 1, Amsong::COLOR_SECOND_BASE);
+    oldPen = pDC->SelectObject(&pen);
+	pDC->Pie(_pie2,
+		CPoint(_pie2.right, _pie2.CenterPoint().y),
+		CPoint(_pie2.left, _pie2.CenterPoint().y));
+    pDC->SelectObject(oldPen);
+    pen.DeleteObject();
+    pDC->SelectObject(oldBrush);
+    brush.DeleteObject();
+
+    brush.CreateSolidBrush(Amsong::COLOR_FIRST_BASE);
+    oldBrush = pDC->SelectObject(&brush);
+    pen.CreatePen(PS_SOLID, 1, Amsong::COLOR_FIRST_BASE);
+    oldPen = pDC->SelectObject(&pen);
+	pDC->Pie(_pie3,
+		CPoint(_pie3.right, _pie3.CenterPoint().y),
+		CPoint(_pie3.left, _pie3.CenterPoint().y));
+    pDC->SelectObject(oldPen);
+    pen.DeleteObject();
+    pDC->SelectObject(oldBrush);
+    brush.DeleteObject();
+
+	// 원 찾은 점 그리기
+	pDC->SelectStockObject(WHITE_BRUSH);
+	if ((0 != _hitPoint.x) && (0 != _hitPoint.y)) {
+		int scale = 8;
+		pDC->Ellipse(_hitPoint.x - scale, _hitPoint.y - scale,
+					 _hitPoint.x + scale, _hitPoint.y + scale);
+	}
+
+	pDC->SelectObject(oldPen);
+
 	return true;
 }
 

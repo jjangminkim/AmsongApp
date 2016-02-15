@@ -167,7 +167,7 @@ private:
 	IDISHDECODER		_hDecoder;
 	HDRAWDIB			_hDrawDib;
 	CBitmap				_bmpCanvas;
-	CBitmap				_bmpGuideCanvas;
+	CBitmap				_bmpReferCanvas;
 	BITMAPINFOHEADER	_bmpInfohead;
 	CCriticalSection	_sync_drawing;
 
@@ -227,9 +227,9 @@ public:
 						UINT nFormat,
 						COLORREF clrText = RGB(255, 255, 255),
 						COLORREF clrBack = RGB(0, 0, 0));
-	bool drawObjects(CDC *pDC);
+	bool drawReferLines(CDC *pDC);
 
-	bool drawGuideImage();
+	bool drawReferImage();
 
 	void moveAllGuidelineshorizontally(int steps);
 	void moveAllGuidelinesVertically(int steps);
@@ -237,7 +237,7 @@ public:
 	void imageAspectRatio(int cx, int cy, const CRect& rctin, CRect& rctout);
     void saveImage(TCHAR* path);
     void saveOriginalImage(TCHAR* path);
-	void saveGuideImage(TCHAR* path);
+	void saveReferImage(TCHAR* path);
     void cpatureImage(BYTE* data, int size);
 
 	void updateStatus(int camera);
