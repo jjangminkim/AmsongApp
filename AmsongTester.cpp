@@ -33,12 +33,18 @@ CAmsongTesterApp::CAmsongTesterApp()
 // 유일한 CAmsongTesterApp 개체입니다.
 
 CAmsongTesterApp theApp;
-
+ULONG_PTR gdiplusToken;
 
 // CAmsongTesterApp 초기화
 
 BOOL CAmsongTesterApp::InitInstance()
 {
+    Gdiplus::GdiplusStartupInput gidplusStartupInput;
+    if (Gdiplus::Ok != Gdiplus::GdiplusStartup(&gdiplusToken, &gidplusStartupInput, NULL)) {
+        AfxMessageBox(_T("Error:Failed to init GDI+ Library!"));
+        return FALSE;
+    }
+
 	// 응용 프로그램 매니페스트가 ComCtl32.dll 버전 6 이상을 사용하여 비주얼 스타일을
 	// 사용하도록 지정하는 경우, Windows XP 상에서 반드시 InitCommonControlsEx()가 필요합니다.
 	// InitCommonControlsEx()를 사용하지 않으면 창을 만들 수 없습니다.
@@ -50,7 +56,6 @@ BOOL CAmsongTesterApp::InitInstance()
 	InitCommonControlsEx(&InitCtrls);
 
 	CWinApp::InitInstance();
-
 
 	AfxEnableControlContainer();
 
@@ -96,3 +101,8 @@ BOOL CAmsongTesterApp::InitInstance()
 	return FALSE;
 }
 
+int CAmsongTesterApp::ExitInstance()
+{
+    Gdiplus::GdiplusShutdown(gdiplusToken);
+    return CWinApp::ExitInstance();
+}

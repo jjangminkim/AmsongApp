@@ -9,6 +9,12 @@
 #include "ScreenViewWnd.h"
 #include "ImageProcessor.h"
 
+#include <boost/shared_ptr.hpp>
+
+namespace Amsong {
+    class ShapeManager;
+}
+
 class CAmsongTesterDlg : public CDialog {
 public:
     CAmsongTesterDlg(CWnd* pParent = NULL);
@@ -26,6 +32,8 @@ protected:
     WatchSDK_Class _watcher;
     IDISHWATCH     _watchHandle;
     CScreenViewWnd _screen;
+
+    boost::shared_ptr<Amsong::ShapeManager> _shapeManager;
 
     ImageProcessor _imageProcessor;
     BYTE*          _capturedImage;

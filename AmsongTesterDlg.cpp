@@ -7,10 +7,13 @@
 #include "AppTypes.h"
 #include "AmsongTesterDlg.h"
 #include "afxdialogex.h"
+#include "ShapeManager.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
+
+using namespace Amsong;
 
 class CAboutDlg : public CDialog {
     public:
@@ -398,6 +401,8 @@ BOOL CAmsongTesterDlg::OnInitDialog()
 
     _capturedImage = 0;
 
+    _shapeManager.reset(new ShapeManager());
+
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
 
@@ -450,6 +455,10 @@ void CAmsongTesterDlg::OnDestroy()
     theApp.WriteProfileStringW(L"AMSONG_APP", L"RemoteAddress", _remoteAddress);
     theApp.WriteProfileStringW(L"AMSONG_APP", L"RemoteId", _remoteId);
 	//theApp.WriteProfileStringW(L"AMSONG_APP", L"RemoteId", _remoteId);
+
+    if (_shapeManager.get()) {
+        _shapeManager.reset();
+    }
 
     if (_watcher.isValidChannel(_channel) &&
 		_watcher.isConnected(_watchHandle, _channel)) {

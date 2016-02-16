@@ -115,6 +115,8 @@
     <ClInclude Include="Resource.h" />
     <ClInclude Include="ScreenFormatter.h" />
     <ClInclude Include="ScreenViewWnd.h" />
+    <ClInclude Include="ShapeManager.h" />
+    <ClInclude Include="Shapes.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="WatchSDK_Sample.h" />
@@ -126,6 +128,8 @@
     <ClCompile Include="ImageProcessor.cpp" />
     <ClCompile Include="ScreenFormatter.cpp" />
     <ClCompile Include="ScreenViewWnd.cpp" />
+    <ClCompile Include="ShapeManager.cpp" />
+    <ClCompile Include="Shapes.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>

@@ -14,6 +14,8 @@ static char THIS_FILE[] = __FILE__;
 
 #pragma comment(lib, "vfw32.lib")
 
+using namespace Gdiplus;
+
 //////////////////////////////////////////////////////////////////////////
 
 class CMemDC
@@ -823,11 +825,27 @@ bool CScreenViewWnd::drawReferImage()
 
     pDC->PatBlt(0, 0, _imageWidth, _imageHeight, WHITENESS);
 
+    Gdiplus::Graphics graphics(*pDC);
+
+    // GDI+ 그리기 테스트..
+    graphics.SetSmoothingMode(SmoothingModeHighQuality);
+    Pen RedPen(Color(255, 192, 0, 0), 2.0f);
+    
+    Point points[3] = {
+        Point(_bigTriangle.topLeft.x, _bigTriangle.topLeft.y),
+        Point(_bigTriangle.topRight.x, _bigTriangle.topRight.y),
+        Point(_bigTriangle.bottomCenter.x, _bigTriangle.bottomCenter.y)};
+    graphics.DrawPolygon(&RedPen, points, 3);
+
+    SolidBrush brush(Color(255, 0, 0, 192));
+    graphics.FillPolygon(&brush, points, 3);
+
 	//CPen pen;
  //   pen.CreatePen(PS_NULL, 0, RGB(0, 0, 0));
  //   CPen* oldPen = pDC->SelectObject(&pen);
 
 	// 삼각형 그리기.
+    /*
     CBrush brush;
     brush.CreateSolidBrush(Amsong::COLOR_THIRD_BASE);
 	CBrush* oldBrush = pDC->SelectObject(&brush);
@@ -933,7 +951,7 @@ bool CScreenViewWnd::drawReferImage()
 	}
 
 	pDC->SelectObject(oldPen);
-
+    */
 	return true;
 }
 
