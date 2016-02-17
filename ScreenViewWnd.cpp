@@ -5,6 +5,7 @@
 #include "AmsongTester.h"
 #include "AmsongTesterDlg.h"
 #include "ScreenViewWnd.h"
+#include "ShapeManager.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -750,65 +751,10 @@ bool CScreenViewWnd::drawText(CDC *pDC,
 
 bool CScreenViewWnd::drawReferLines(CDC *pDC)
 {
-	ASSERT(pDC != NULL);
-	if (pDC->GetSafeHdc() == NULL) return false;
-
-	CPen pen;
-    pen.CreatePen(PS_SOLID, 2, RGB(0,0,0));
-    CPen* oldPen = pDC->SelectObject(&pen);
-
-	// 삼각형 그리기.
-	Amsong::Point p1 = _bigTriangle.topLeft;
-	Amsong::Point p2 = _bigTriangle.topRight;
-	Amsong::Point p3 = _bigTriangle.bottomCenter;
-	pDC->MoveTo(p1.x, p1.y);
-	pDC->LineTo(p2.x, p2.y);
-	pDC->MoveTo(p2.x, p2.y);
-	pDC->LineTo(p3.x, p3.y);
-	pDC->MoveTo(p3.x, p3.y);
-	pDC->LineTo(p1.x, p1.y);
-
-	p1 = _middleTriangle.topLeft;
-	p2 = _middleTriangle.topRight;
-	p3 = _middleTriangle.bottomCenter;
-	pDC->MoveTo(p1.x, p1.y);
-	pDC->LineTo(p2.x, p2.y);
-	pDC->MoveTo(p2.x, p2.y);
-	pDC->LineTo(p3.x, p3.y);
-	pDC->MoveTo(p3.x, p3.y);
-	pDC->LineTo(p1.x, p1.y);
-
-	p1 = _smallTriangle.topLeft;
-	p2 = _smallTriangle.topRight;
-	p3 = _smallTriangle.bottomCenter;
-	pDC->MoveTo(p1.x, p1.y);
-	pDC->LineTo(p2.x, p2.y);
-	pDC->MoveTo(p2.x, p2.y);
-	pDC->LineTo(p3.x, p3.y);
-	pDC->MoveTo(p3.x, p3.y);
-	pDC->LineTo(p1.x, p1.y);
-
-	pDC->SelectStockObject(NULL_BRUSH);
-
-	pDC->Pie(_pie1,
-		CPoint(_pie1.right, _pie1.CenterPoint().y),
-		CPoint(_pie1.left, _pie1.CenterPoint().y));
-	pDC->Pie(_pie2,
-		CPoint(_pie2.right, _pie2.CenterPoint().y),
-		CPoint(_pie2.left, _pie2.CenterPoint().y));
-	pDC->Pie(_pie3,
-		CPoint(_pie3.right, _pie3.CenterPoint().y),
-		CPoint(_pie3.left, _pie3.CenterPoint().y));
-
-	// 원 찾은 점 그리기
-	pDC->SelectStockObject(WHITE_BRUSH);
-	if ((0 != _hitPoint.x) && (0 != _hitPoint.y)) {
-		int scale = 8;
-		pDC->Ellipse(_hitPoint.x - scale, _hitPoint.y - scale,
-					 _hitPoint.x + scale, _hitPoint.y + scale);
-	}
-
-	pDC->SelectObject(oldPen);
+    if (_shapeManager) {
+        Gdiplus::Graphics graphics(*pDC);
+        _shapeManager->drawAllShapes(&graphics);
+    }
 
 	return true;
 }
@@ -822,181 +768,14 @@ bool CScreenViewWnd::drawReferImage()
 	MemDC.CreateDC(parentDC, &_bmpReferCanvas);
 
     CDC* pDC = &MemDC;
-
     pDC->PatBlt(0, 0, _imageWidth, _imageHeight, WHITENESS);
 
-    Gdiplus::Graphics graphics(*pDC);
-
-    // GDI+ 그리기 테스트..
-    graphics.SetSmoothingMode(SmoothingModeHighQuality);
-    Pen RedPen(Color(255, 192, 0, 0), 2.0f);
-    
-    Point points[3] = {
-        Point(_bigTriangle.topLeft.x, _bigTriangle.topLeft.y),
-        Point(_bigTriangle.topRight.x, _bigTriangle.topRight.y),
-        Point(_bigTriangle.bottomCenter.x, _bigTriangle.bottomCenter.y)};
-    graphics.DrawPolygon(&RedPen, points, 3);
-
-    SolidBrush brush(Color(255, 0, 0, 192));
-    graphics.FillPolygon(&brush, points, 3);
-
-	//CPen pen;
- //   pen.CreatePen(PS_NULL, 0, RGB(0, 0, 0));
- //   CPen* oldPen = pDC->SelectObject(&pen);
-
-	// 삼각형 그리기.
-    /*
-    CBrush brush;
-    brush.CreateSolidBrush(Amsong::COLOR_THIRD_BASE);
-	CBrush* oldBrush = pDC->SelectObject(&brush);
-    CPen pen;
-    pen.CreatePen(PS_SOLID, 1, Amsong::COLOR_THIRD_BASE);
-    CPen* oldPen = pDC->SelectObject(&pen);
-	Amsong::Point p1 = _bigTriangle.topLeft;
-	Amsong::Point p2 = _bigTriangle.topRight;
-	Amsong::Point p3 = _bigTriangle.bottomCenter;
-    POINT triPoints[3];
-    triPoints[0].x = _bigTriangle.topLeft.x;
-    triPoints[0].y = _bigTriangle.topLeft.y;
-    triPoints[1].x = _bigTriangle.topRight.x;
-    triPoints[1].y = _bigTriangle.topRight.y;
-    triPoints[2].x = _bigTriangle.bottomCenter.x;
-    triPoints[2].y = _bigTriangle.bottomCenter.y;
-    pDC->Polygon(triPoints, 3);
-    pDC->SelectObject(oldPen);
-    pen.DeleteObject();
-    pDC->SelectObject(oldBrush);
-    brush.DeleteObject();
-
-    brush.CreateSolidBrush(Amsong::COLOR_SECOND_BASE);
-	oldBrush = pDC->SelectObject(&brush);
-    pen.CreatePen(PS_SOLID, 1, Amsong::COLOR_SECOND_BASE);
-    oldPen = pDC->SelectObject(&pen);
-	p1 = _middleTriangle.topLeft;
-	p2 = _middleTriangle.topRight;
-	p3 = _middleTriangle.bottomCenter;
-    triPoints[0].x = _middleTriangle.topLeft.x;
-    triPoints[0].y = _middleTriangle.topLeft.y;
-    triPoints[1].x = _middleTriangle.topRight.x;
-    triPoints[1].y = _middleTriangle.topRight.y;
-    triPoints[2].x = _middleTriangle.bottomCenter.x;
-    triPoints[2].y = _middleTriangle.bottomCenter.y;
-    pDC->Polygon(triPoints, 3);
-    pDC->SelectObject(oldPen);
-    pen.DeleteObject();
-    pDC->SelectObject(oldBrush);
-    brush.DeleteObject();
-
-    brush.CreateSolidBrush(Amsong::COLOR_FIRST_BASE);
-	oldBrush = pDC->SelectObject(&brush);
-    pen.CreatePen(PS_SOLID, 1, Amsong::COLOR_FIRST_BASE);
-    oldPen = pDC->SelectObject(&pen);
-	p1 = _smallTriangle.topLeft;
-	p2 = _smallTriangle.topRight;
-	p3 = _smallTriangle.bottomCenter;
-    triPoints[0].x = _smallTriangle.topLeft.x;
-    triPoints[0].y = _smallTriangle.topLeft.y;
-    triPoints[1].x = _smallTriangle.topRight.x;
-    triPoints[1].y = _smallTriangle.topRight.y;
-    triPoints[2].x = _smallTriangle.bottomCenter.x;
-    triPoints[2].y = _smallTriangle.bottomCenter.y;
-    pDC->Polygon(triPoints, 3);
-    pDC->SelectObject(oldPen);
-    pen.DeleteObject();
-    pDC->SelectObject(oldBrush);
-    brush.DeleteObject();
-
-    brush.CreateSolidBrush(Amsong::COLOR_THIRD_BASE);
-	oldBrush = pDC->SelectObject(&brush);
-    pen.CreatePen(PS_SOLID, 1, Amsong::COLOR_THIRD_BASE);
-    oldPen = pDC->SelectObject(&pen);
-	pDC->Pie(_pie1,
-		CPoint(_pie1.right, _pie1.CenterPoint().y),
-		CPoint(_pie1.left, _pie1.CenterPoint().y));
-    pDC->SelectObject(oldPen);
-    pen.DeleteObject();
-    pDC->SelectObject(oldBrush);
-    brush.DeleteObject();
-
-    brush.CreateSolidBrush(Amsong::COLOR_SECOND_BASE);
-    oldBrush = pDC->SelectObject(&brush);
-    pen.CreatePen(PS_SOLID, 1, Amsong::COLOR_SECOND_BASE);
-    oldPen = pDC->SelectObject(&pen);
-	pDC->Pie(_pie2,
-		CPoint(_pie2.right, _pie2.CenterPoint().y),
-		CPoint(_pie2.left, _pie2.CenterPoint().y));
-    pDC->SelectObject(oldPen);
-    pen.DeleteObject();
-    pDC->SelectObject(oldBrush);
-    brush.DeleteObject();
-
-    brush.CreateSolidBrush(Amsong::COLOR_FIRST_BASE);
-    oldBrush = pDC->SelectObject(&brush);
-    pen.CreatePen(PS_SOLID, 1, Amsong::COLOR_FIRST_BASE);
-    oldPen = pDC->SelectObject(&pen);
-	pDC->Pie(_pie3,
-		CPoint(_pie3.right, _pie3.CenterPoint().y),
-		CPoint(_pie3.left, _pie3.CenterPoint().y));
-    pDC->SelectObject(oldPen);
-    pen.DeleteObject();
-    pDC->SelectObject(oldBrush);
-    brush.DeleteObject();
-
-	// 원 찾은 점 그리기
-	pDC->SelectStockObject(WHITE_BRUSH);
-	if ((0 != _hitPoint.x) && (0 != _hitPoint.y)) {
-		int scale = 8;
-		pDC->Ellipse(_hitPoint.x - scale, _hitPoint.y - scale,
-					 _hitPoint.x + scale, _hitPoint.y + scale);
-	}
-
-	pDC->SelectObject(oldPen);
-    */
+    if (_shapeManager) {
+        Gdiplus::Graphics graphics(*pDC);
+        _shapeManager->fillAllShapes(&graphics);
+    }
+  
 	return true;
-}
-
-void CScreenViewWnd::moveAllGuidelineshorizontally(int steps)
-{
-	_bigTriangle.bottomCenter.x += steps;
-	_bigTriangle.topLeft.x += steps;
-	_bigTriangle.topRight.x += steps;
-
-	_middleTriangle.bottomCenter.x += steps;
-	_middleTriangle.topLeft.x += steps;
-	_middleTriangle.topRight.x += steps;
-
-	_smallTriangle.bottomCenter.x += steps;
-	_smallTriangle.topLeft.x += steps;
-	_smallTriangle.topRight.x += steps;
-
-	_pie1.left += steps;
-	_pie1.right += steps;
-	_pie2.left += steps;
-	_pie2.right += steps;
-	_pie3.left += steps;
-	_pie3.right += steps;
-}
-
-void CScreenViewWnd::moveAllGuidelinesVertically(int steps)
-{
-	_bigTriangle.bottomCenter.y += steps;
-	_bigTriangle.topLeft.y += steps;
-	_bigTriangle.topRight.y += steps;
-
-	_middleTriangle.bottomCenter.y += steps;
-	_middleTriangle.topLeft.y += steps;
-	_middleTriangle.topRight.y += steps;
-
-	_smallTriangle.bottomCenter.y += steps;
-	_smallTriangle.topLeft.y += steps;
-	_smallTriangle.topRight.y += steps;
-
-	_pie1.top += steps;
-	_pie1.bottom += steps;
-	_pie2.top += steps;
-	_pie2.bottom += steps;
-	_pie3.top += steps;
-	_pie3.bottom += steps;
 }
 
 void CScreenViewWnd::imageAspectRatio(int cx, int cy, const CRect& rctin, CRect& rctout)

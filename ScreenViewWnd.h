@@ -150,6 +150,10 @@ inline void FrameQueue::FrameDataElement::setData(const PARAMWS_FRAMEINFO& rFram
 
 //////////////////////////////////////////////////////////////////////////
 
+namespace Amsong {
+    class ShapeManager;
+}
+
 class CScreenViewWnd : public CDialog
 {
 	DECLARE_DYNAMIC(CScreenViewWnd)
@@ -175,6 +179,8 @@ private:
 	CameraView*			_cameraView;
 	ScreenFormatter		_fmtScreen;
 
+    Amsong::ShapeManager* _shapeManager;
+
 	LPBYTE				_imageBuffer;
 	CRect				_rectClient;
 	CRect				_rectScreen;
@@ -188,28 +194,13 @@ private:
 	bool				_fuse1x1Mode;
 	bool				_fuseAspectRatio;
 
-private:
-	Amsong::Triangle _bigTriangle;
-	Amsong::Triangle _middleTriangle;
-	Amsong::Triangle _smallTriangle;
-
-	CRect _pie1;
-	CRect _pie2;
-	CRect _pie3;
-
-	Amsong::Point _hitPoint;
-
 // Getter, Setter
 public:
     int imageWidth()  { return _imageWidth;  }
     int imageHeight() { return _imageHeight; }
     int imageSize()   { return _imageWidth * _imageHeight * 4; }
 
-	void setBigTriangle(const Amsong::Triangle& triangle) { _bigTriangle = triangle; }
-	void setMiddleTriangle(const Amsong::Triangle& triangle) { _middleTriangle = triangle; }
-	void setSmallTriangle(const Amsong::Triangle& triangle) { _smallTriangle = triangle; }
-	void setPies(const CRect& pie1, const CRect& pie2, const CRect& pie3);
-	void setHitPoint(const Amsong::Point& point) { _hitPoint = point; }
+    void setShapeManager(Amsong::ShapeManager* sm) { _shapeManager = sm; }
 
 // Operations
 public:
@@ -230,9 +221,6 @@ public:
 	bool drawReferLines(CDC *pDC);
 
 	bool drawReferImage();
-
-	void moveAllGuidelineshorizontally(int steps);
-	void moveAllGuidelinesVertically(int steps);
 
 	void imageAspectRatio(int cx, int cy, const CRect& rctin, CRect& rctout);
     void saveImage(TCHAR* path);
@@ -296,13 +284,6 @@ protected:
 };
 
 //////////////////////////////////////////////////////////////////////////
-
-inline void CScreenViewWnd::setPies(const CRect& pie1, const CRect& pie2, const CRect& pie3)
-{
-	_pie1 = pie1;
-	_pie2 = pie2;
-	_pie3 = pie3;
-}
 
 inline bool CScreenViewWnd::putLoadedFrame(const PARAMWS_FRAMEINFO& rFrame)
 {

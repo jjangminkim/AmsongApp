@@ -7,23 +7,7 @@
 
 namespace Amsong {
 
-	typedef struct Point {
-		Point() : x(0), y(0) {}
-		Point(int x_, int y_) : x(x_), y(y_) {}
-		int x;
-		int y;
-	} Point;
-
-	typedef struct Triangle {
-		Triangle() {}
-		Triangle(Point topLeft_, Point topRight_, Point bottomCenter_)
-			: topLeft(topLeft_)
-			, topRight(topRight_)
-			, bottomCenter(bottomCenter_) {}
-		Point topLeft;
-		Point topRight;
-		Point bottomCenter;
-	} Triangle;
+    const CString APP_NAME = _T("AMSONG_APP");
 
 	// COLOR DEFINES
 	const COLORREF COLOR_THIRD_BASE  = RGB(237, 249, 0);

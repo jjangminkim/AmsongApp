@@ -7,7 +7,7 @@ namespace Amsong {
 
     class ShapeManager {
     public:
-        ShapeManager();
+        ShapeManager(CWinApp* app);
         ~ShapeManager() {}
 
     public:
@@ -21,10 +21,20 @@ namespace Amsong {
             MAX_TRIS
         };
 
+        enum PIE_ID {
+            BIG_CENTER_PIE = 0, // homerun
+            BIG_LEFT_PIE,       // 3rd base    
+            BIG_RIGHT_PIE,      // 3rd base
+            MID_PIE,            // 2nd base
+            SMALL_PIE,          // 1st base
+
+            MAX_PIES,
+        };
+
         // Fill with WHITE color (out)
         enum RECTANGLE_ID {
-            OUT_CENTER_RECT = 0,
-            OUT_LEFT_RECT,
+            OUT_LEFT_RECT = 0,
+            OUT_CENTER_RECT,
             OUT_RIGHT_RECT,
             MID_LEFT_RECT,
             MID_RIGHT_RECT,
@@ -33,16 +43,6 @@ namespace Amsong {
             BOTTOM_RECT,
 
             MAX_RECTS,
-        };
-
-        enum PIE_ID {
-            BIG_LEFT_PIE = 0,   // 3rd base
-            BIG_CENTER_PIE,     // homerun
-            BIG_RIGHT_PIE,      // 3rd base
-            MID_PIE,            // 2nd base
-            SMALL_PIE,          // 1st base
-
-            MAX_PIES,
         };
 
     private:
@@ -54,6 +54,15 @@ namespace Amsong {
         Gdiplus::Color _triangleColors[MAX_TRIS];
         Gdiplus::Color _pieColors[MAX_PIES];
 
+    private:
+        void initPoints();
+        void initColors();
+
+    public:
+        void clearAllPositions();
+        void loadAllPositions(CWinApp* app);
+        void saveAllPositions(CWinApp* app);
+
     public:
         void setTriangle(int id, const PointArray& points);
         void setRectangle(int id, const PointArray& points);
@@ -62,6 +71,17 @@ namespace Amsong {
     public:
         void moveTrianglePoint(int id, int pointIndex, int x, int y);
         void moveRetanglePoint(int id, int pointIndex, int x, int y);
+
+        void moveRectangle(int id, int widthStep, int heightStep);
+        void moveTriangle(int id, int widthStep, int heightStep);
+        void movePie(int id, int widthStep, int heightStep);
+
+        void resizeRectangle(int id, int widthStep, int heightStep);
+        void resizeTriangle(int id, int widthStep, int heightStep);
+        void resizePie(int id, int widthStep, int heightStep, int angleStep);
+
+    public:
+        PointArray makeRectanglePoints(int x, int y, int width, int height);
         void setPieSize(int id, int width, int height);
 
     public:

@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Shapes.h"
+#include "AppTypes.h"
 
 #include <boost/foreach.hpp>
 
@@ -8,36 +9,81 @@ using namespace Gdiplus;
 
 void Shape::setPoint(int i, const Gdiplus::Point& point)
 {
-    ASSERT(_points.size() <= static_cast<unsigned int>(i));
+    ASSERT(static_cast<unsigned int>(i) < _points.size());
     _points[i] = point;
 }
 
-///////////////////////////////////////////////////////////////////////////
+bool Shape::allPointsAreZero()
+{
+    bool allZero = true;
+    for (unsigned int i = 0; i < _points.size(); ++i) {
+        if (0 != _points[i].X || 0 != _points[i].Y) {
+            allZero = false;
+            break;
+        }
+    }
 
-void Polygon::moveHorizontally(int step)
+    return allZero;
+}
+
+void Shape::loadPoints(CWinApp* app, const CString& keyName)
+{
+    CString keyNameX, keyNameY;
+    for (unsigned int i = 0; i < _points.size(); ++i) {
+        keyNameX = keyName;
+        keyNameX.AppendFormat(_T("_P%d_X"));
+        _points[i].X = app->GetProfileInt(APP_NAME, keyNameX, 0);
+
+        keyNameY = keyName;
+        keyNameY.AppendFormat(_T("_P%d_Y"));
+        _points[i].Y = app->GetProfileInt(APP_NAME, keyNameY, 0);
+    }
+}
+
+void Shape::savePoints(CWinApp* app, const CString& keyName)
+{
+    CString keyNameX, keyNameY;
+    for (unsigned int i = 0; i < _points.size(); ++i) {
+        keyNameX = keyName;
+        keyNameX.AppendFormat(_T("_P%d_X"));
+        app->WriteProfileInt(APP_NAME, keyNameX, _points[i].X);
+
+        keyNameY = keyName;
+        keyNameY.AppendFormat(_T("_P%d_Y"));
+        app->WriteProfileInt(APP_NAME, keyNameY, _points[i].Y);
+    }
+}
+
+void Shape::moveHorizontally(int step)
 {
     for (unsigned int i = 0; i < _points.size(); ++i) {
         _points[i].X += step;
     }
 }
 
-void Polygon::moveVertically(int step)
+void Shape::moveVertically(int step)
 {
     for (unsigned int i = 0; i < _points.size(); ++i) {
         _points[i].Y += step;
     }
 }
 
+///////////////////////////////////////////////////////////////////////////
+
 void Polygon::drawShape(Gdiplus::Graphics* g)
 {
-    Pen pen(Color(255, 0, 0, 0));
-    g->DrawPolygon(&pen, &_points[0], _points.size());
+    if (!allPointsAreZero()) {
+        Pen pen(Color(255, 0, 0, 0), 2.0F);
+        g->DrawPolygon(&pen, &_points[0], _points.size());
+    }
 }
 
 void Polygon::fillShape(Gdiplus::Graphics* g)
 {
-    SolidBrush brush(_color);
-    g->FillPolygon(&brush, &_points[0], _points.size());
+    if (!allPointsAreZero()) {
+        SolidBrush brush(_color);
+        g->FillPolygon(&brush, &_points[0], _points.size());
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -78,31 +124,21 @@ int Pie::height() const
     return (_points[1].Y - _points[0].Y);
 }
 
-void Pie::moveHorizontally(int step)
-{
-    for (unsigned int i = 0; i < MAX_POINTS; ++i) {
-        _points[i].X += step;
-    }
-}
-
-void Pie::moveVertically(int step)
-{
-    for (unsigned int i = 0; i < MAX_POINTS; ++i) {
-        _points[i].Y += step;
-    }
-}
-
 void Pie::drawShape(Gdiplus::Graphics* g)
 {
-     Rect rect(_points[0].X, _points[0].Y, width(), height());
-     Pen pen(Color(255, 0, 0, 0));
-     g->DrawPie(&pen, rect, _angle.first, _angle.second);
+    if (!allPointsAreZero()) {
+        Rect rect(_points[0].X, _points[0].Y, width(), height());
+        Pen pen(Color(255, 0, 0, 0), 2.0F);
+        g->DrawPie(&pen, rect, _angle.first, _angle.second);
+    }
 }
 
 void Pie::fillShape(Gdiplus::Graphics* g)
 {
-    Rect rect(_points[0].X, _points[0].Y,
-              (_points[1].X - _points[0].X), (_points[1].Y - _points[0].Y));
-    SolidBrush brush(_color);
-    g->FillPie(&brush, rect, _angle.first, _angle.second);
+    if (!allPointsAreZero()) {
+        Rect rect(_points[0].X, _points[0].Y,
+                  (_points[1].X - _points[0].X), (_points[1].Y - _points[0].Y));
+        SolidBrush brush(_color);
+        g->FillPie(&brush, rect, _angle.first, _angle.second);
+    }
 }

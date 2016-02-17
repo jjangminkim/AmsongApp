@@ -30,12 +30,9 @@ void ImageProcessor::setCapturedImage(BYTE* _data, int size, int width, int heig
 	Mat cpaturedImage(height, width, CV_8UC4, _data);
     _cpaturedImage = cpaturedImage.clone();
 	flip(_cpaturedImage, _cpaturedImage, 0);
-	
-	ImageProcessor::detectCircle();
-
 }
 
-Amsong::Point ImageProcessor::detectCircle()
+Gdiplus::Point ImageProcessor::detectCircle()
 {
 	// detect circle.
 	IplImage* iplImage_img = new IplImage(_cpaturedImage);
@@ -91,7 +88,7 @@ Amsong::Point ImageProcessor::detectCircle()
 
 	// output
 	int i;
-	Amsong::Point centerOfCircle;
+	Gdiplus::Point centerOfCircle;
 	for (i = 0; i < circles->total; i++) {
 		float *p = (float*)cvGetSeqElem(circles, i);
 		CvPoint center = cvPoint(cvRound(p[0]),cvRound(p[1]));
@@ -104,31 +101,31 @@ Amsong::Point ImageProcessor::detectCircle()
 		cvCircle(&filtered, center, 3, CV_RGB(0,255,0), -1, CV_AA, 0);
 		cvCircle(&filtered, center, cvRound(p[2]), CV_RGB(255,0,0), 3, CV_AA, 0);
 
-		centerOfCircle.x = center.x;
-		centerOfCircle.y = center.y;
+		centerOfCircle.X = center.x;
+		centerOfCircle.Y = center.y;
 	}
 
 	Mat res(iplImage_img);
-	imshow("result", res);
+	//imshow("result", res);
 
 	cvReleaseMemStorage(&storage);
 
 	return centerOfCircle;
 }
 
-COLORREF ImageProcessor::getColorOfPointFromReferImage(Amsong::Point hitPoint)
+Gdiplus::Color ImageProcessor::getColorOfPointFromReferImage(Gdiplus::Point hitPoint)
 {
-	Mat referImage = imread("refer.bmp");
+	Mat referImage = imread("ReferImage.bmp");
 	IplImage* iplReferImage = new IplImage(referImage);
 
 	unsigned char red, green, blue;
 	red = green = blue = 0;
 
-	int index = (hitPoint.y * iplReferImage->widthStep) + (hitPoint.x * 3);
+	int index = (hitPoint.Y * iplReferImage->widthStep) + (hitPoint.X * 3);
 	red = iplReferImage->imageData[index + 2];
 	green = iplReferImage->imageData[index + 1];
 	blue = iplReferImage->imageData[index];
-	COLORREF color = RGB(red, green, blue);
+    Gdiplus::Color color = Gdiplus::Color(255, red, green, blue);
 
 	return color;
 }

@@ -8,6 +8,7 @@
 #include "AmsongTesterDlg.h"
 #include "afxdialogex.h"
 #include "ShapeManager.h"
+#include "ReferShapeConfigDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -48,7 +49,6 @@ CAmsongTesterDlg::CAmsongTesterDlg(CWnd* pParent /*=NULL*/)
     , _appStatus(APP_STATUS_DISCONNECTED)
 	, _captureDelayedMilisec(0)
 	, _eventOccurredTick(0)
-	, _moveGuidelineSize(1)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
     
@@ -79,11 +79,8 @@ BEGIN_MESSAGE_MAP(CAmsongTesterDlg, CDialog)
 	ON_BN_CLICKED(IDC_BUTTON_LINE_APPLY, &CAmsongTesterDlg::OnBnClickedButtonLineApply)
 	ON_BN_CLICKED(IDC_BUTTON_LINE_SAVE, &CAmsongTesterDlg::OnBnClickedButtonLineSave)
 	ON_BN_CLICKED(IDC_BUTTON_SAVE_IMAGE, &CAmsongTesterDlg::OnBnClickedButtonSaveImage)
-	ON_BN_CLICKED(IDC_BUTTON_MOVE_ALL_LEFT, &CAmsongTesterDlg::OnBnClickedButtonMoveAllLeft)
-	ON_BN_CLICKED(IDC_BUTTON_MOVE_ALL_UP, &CAmsongTesterDlg::OnBnClickedButtonMoveAllUp)
-	ON_BN_CLICKED(IDC_BUTTON_MOVE_ALL_DOWN, &CAmsongTesterDlg::OnBnClickedButtonMoveAllDown)
-	ON_BN_CLICKED(IDC_BUTTON_MOVE_ALL_RIGHT, &CAmsongTesterDlg::OnBnClickedButtonMoveAllRight)
     ON_BN_CLICKED(IDC_BUTTON_SAVE_REFER_IMAGE, &CAmsongTesterDlg::OnBnClickedButtonSaveReferImage)
+    ON_BN_CLICKED(IDC_BUTTON_REF_DIALOG, &CAmsongTesterDlg::OnBnClickedButtonRefDialog)
 END_MESSAGE_MAP()
 
 // watchSDK callback function ///////////////////////////////////////////////
@@ -294,7 +291,6 @@ BOOL CAmsongTesterDlg::OnInitDialog()
     _lpOwnerWnd = this;
     _fDisconnectByMe = false;
 	_enableEvent = true;
-	_moveGuidelineSize = 1;
 
     // Init Controls
     setAppStatus(APP_STATUS_DISCONNECTED);
@@ -308,80 +304,15 @@ BOOL CAmsongTesterDlg::OnInitDialog()
     SetDlgItemText(IDC_EDIT_REMOTE_ADDR, _remoteAddress);
     SetDlgItemText(IDC_EDIT_REMOTE_ID, _remoteId);
     SetDlgItemText(IDC_EDIT_REMOTE_PASSWORD, _remotePassword);
-	SetDlgItemText(IDC_EDIT_DELAY, delayTime);
-
-	// 가이드라인을 위한 POINT 설정.
-	// IDC_EDIT_T1_P1_X
-	CString p1_x = theApp.GetProfileString(L"AMSONG_APP", L"T1_P1_X", L"240");
-	CString p1_y = theApp.GetProfileString(L"AMSONG_APP", L"T1_P1_Y", L"360");
-	CString p2_x = theApp.GetProfileString(L"AMSONG_APP", L"T1_P2_X", L"1040");
-	CString p2_y = theApp.GetProfileString(L"AMSONG_APP", L"T1_P2_Y", L"360");
-	CString p3_x = theApp.GetProfileString(L"AMSONG_APP", L"T1_P3_X", L"640");
-	CString p3_y = theApp.GetProfileString(L"AMSONG_APP", L"T1_P3_Y", L"700");
-	SetDlgItemText(IDC_EDIT_T1_P1_X, p1_x);
-	SetDlgItemText(IDC_EDIT_T1_P1_Y, p1_y);
-	SetDlgItemText(IDC_EDIT_T1_P2_X, p2_x);
-	SetDlgItemText(IDC_EDIT_T1_P2_Y, p2_y);
-	SetDlgItemText(IDC_EDIT_T1_P3_X, p3_x);
-	SetDlgItemText(IDC_EDIT_T1_P3_Y, p3_y);
-
-	p1_x = theApp.GetProfileString(L"AMSONG_APP", L"T2_P1_X", L"340");
-	p1_y = theApp.GetProfileString(L"AMSONG_APP", L"T2_P1_Y", L"360");
-	p2_x = theApp.GetProfileString(L"AMSONG_APP", L"T2_P2_X", L"940");
-	p2_y = theApp.GetProfileString(L"AMSONG_APP", L"T2_P2_Y", L"360");
-	p3_x = theApp.GetProfileString(L"AMSONG_APP", L"T2_P3_X", L"640");
-	p3_y = theApp.GetProfileString(L"AMSONG_APP", L"T2_P3_Y", L"600");
-	SetDlgItemText(IDC_EDIT_T2_P1_X, p1_x);
-	SetDlgItemText(IDC_EDIT_T2_P1_Y, p1_y);
-	SetDlgItemText(IDC_EDIT_T2_P2_X, p2_x);
-	SetDlgItemText(IDC_EDIT_T2_P2_Y, p2_y);
-	SetDlgItemText(IDC_EDIT_T2_P3_X, p3_x);
-	SetDlgItemText(IDC_EDIT_T2_P3_Y, p3_y);
-
-	p1_x = theApp.GetProfileString(L"AMSONG_APP", L"T3_P1_X", L"440");
-	p1_y = theApp.GetProfileString(L"AMSONG_APP", L"T3_P1_Y", L"360");
-	p2_x = theApp.GetProfileString(L"AMSONG_APP", L"T3_P2_X", L"840");
-	p2_y = theApp.GetProfileString(L"AMSONG_APP", L"T3_P2_Y", L"360");
-	p3_x = theApp.GetProfileString(L"AMSONG_APP", L"T3_P3_X", L"640");
-	p3_y = theApp.GetProfileString(L"AMSONG_APP", L"T3_P3_Y", L"500");
-	SetDlgItemText(IDC_EDIT_T3_P1_X, p1_x);
-	SetDlgItemText(IDC_EDIT_T3_P1_Y, p1_y);
-	SetDlgItemText(IDC_EDIT_T3_P2_X, p2_x);
-	SetDlgItemText(IDC_EDIT_T3_P2_Y, p2_y);
-	SetDlgItemText(IDC_EDIT_T3_P3_X, p3_x);
-	SetDlgItemText(IDC_EDIT_T3_P3_Y, p3_y);
-
-	p1_x = theApp.GetProfileString(L"AMSONG_APP", L"C1_P1_X", L"240");
-	p1_y = theApp.GetProfileString(L"AMSONG_APP", L"C1_P1_Y", L"20");
-	p2_x = theApp.GetProfileString(L"AMSONG_APP", L"C1_P2_X", L"1040");
-	p2_y = theApp.GetProfileString(L"AMSONG_APP", L"C1_P2_Y", L"700");
-	SetDlgItemText(IDC_EDIT_C1_P1_X, p1_x);
-	SetDlgItemText(IDC_EDIT_C1_P1_Y, p1_y);
-	SetDlgItemText(IDC_EDIT_C1_P2_X, p2_x);
-	SetDlgItemText(IDC_EDIT_C1_P2_Y, p2_y);
-
-	p1_x = theApp.GetProfileString(L"AMSONG_APP", L"C2_P1_X", L"340");
-	p1_y = theApp.GetProfileString(L"AMSONG_APP", L"C2_P1_Y", L"120");
-	p2_x = theApp.GetProfileString(L"AMSONG_APP", L"C2_P2_X", L"940");
-	p2_y = theApp.GetProfileString(L"AMSONG_APP", L"C2_P2_Y", L"600");
-	SetDlgItemText(IDC_EDIT_C2_P1_X, p1_x);
-	SetDlgItemText(IDC_EDIT_C2_P1_Y, p1_y);
-	SetDlgItemText(IDC_EDIT_C2_P2_X, p2_x);
-	SetDlgItemText(IDC_EDIT_C2_P2_Y, p2_y);
-
-	p1_x = theApp.GetProfileString(L"AMSONG_APP", L"C3_P1_X", L"440");
-	p1_y = theApp.GetProfileString(L"AMSONG_APP", L"C3_P1_Y", L"220");
-	p2_x = theApp.GetProfileString(L"AMSONG_APP", L"C3_P2_X", L"840");
-	p2_y = theApp.GetProfileString(L"AMSONG_APP", L"C3_P2_Y", L"500");
-	SetDlgItemText(IDC_EDIT_C3_P1_X, p1_x);
-	SetDlgItemText(IDC_EDIT_C3_P1_Y, p1_y);
-	SetDlgItemText(IDC_EDIT_C3_P2_X, p2_x);
-	SetDlgItemText(IDC_EDIT_C3_P2_Y, p2_y);
+	SetDlgItemText(IDC_EDIT_DELAY, delayTime);  
 
 	CRect thisRect;
 	this->GetWindowRect(&thisRect);
 
+    _shapeManager.reset(new ShapeManager(&theApp));
+
     _screen.initialize(CRect(0, 0, 1280, 720));
+    _screen.setShapeManager(_shapeManager.get());
 	_screen.Create(IDD_DIALOG_SCREENVIEW, this);
 	_screen.MoveWindow(thisRect.left + 282, 1, 1280, 720, FALSE);
 	_screen.ShowWindow(SW_SHOW);
@@ -400,8 +331,6 @@ BOOL CAmsongTesterDlg::OnInitDialog()
     _watcher.registerCallback(_watchHandle, CALLBACK_WATCH::DEVICESTATUSLOADED, watch_deviceStatusLoaded);
 
     _capturedImage = 0;
-
-    _shapeManager.reset(new ShapeManager());
 
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
@@ -456,6 +385,11 @@ void CAmsongTesterDlg::OnDestroy()
     theApp.WriteProfileStringW(L"AMSONG_APP", L"RemoteId", _remoteId);
 	//theApp.WriteProfileStringW(L"AMSONG_APP", L"RemoteId", _remoteId);
 
+    if (_referShapeConfigDlg.get()) {
+        _referShapeConfigDlg->DestroyWindow();
+        _referShapeConfigDlg.reset();
+    }
+
     if (_shapeManager.get()) {
         _shapeManager.reset();
     }
@@ -501,6 +435,8 @@ void CAmsongTesterDlg::setAppStatus(unsigned char appStatus)
 	GetDlgItem(IDC_BUTTON_LINE_APPLY)->EnableWindow(disableAll ? FALSE : !enable);
 	GetDlgItem(IDC_BUTTON_LINE_SAVE)->EnableWindow(disableAll ? FALSE : !enable);
 	GetDlgItem(IDC_BUTTON_SAVE_IMAGE)->EnableWindow(disableAll ? FALSE : !enable);
+    GetDlgItem(IDC_BUTTON_REF_DIALOG)->EnableWindow(disableAll ? FALSE : !enable);
+    GetDlgItem(IDC_BUTTON_SAVE_REFER_IMAGE)->EnableWindow(disableAll ? FALSE : !enable);
     GetDlgItem(IDC_EDIT_REMOTE_ADDR)->EnableWindow(disableAll ? FALSE : enable);
     GetDlgItem(IDC_EDIT_REMOTE_ID)->EnableWindow(disableAll ? FALSE : enable);
     GetDlgItem(IDC_BUTTON_CONNECT)->EnableWindow(disableAll ? FALSE : enable);
@@ -528,38 +464,42 @@ void CAmsongTesterDlg::captureImage()
     _screen.cpatureImage(_capturedImage, imageSize);
     _imageProcessor.setCapturedImage(_capturedImage, imageSize, imageWidth, imageHeight);
 
-	Amsong::Point hitPoint = _imageProcessor.detectCircle();
+	Gdiplus::Point hitPoint = _imageProcessor.detectCircle();
 
 	// 디버그용 테스트.
-	//hitPoint.x = 640;
-	//hitPoint.y = 360;
+	hitPoint.X = 640;
+	hitPoint.Y = 360;
 
-	_screen.setHitPoint(hitPoint);
-
-	if (0 != hitPoint.x && 0 != hitPoint.y) {
-		COLORREF colorOfHitPoint = _imageProcessor.getColorOfPointFromReferImage(hitPoint);
+	if (0 != hitPoint.X && 0 != hitPoint.Y) {
+		Gdiplus::Color colorOfHitPoint = _imageProcessor.getColorOfPointFromReferImage(hitPoint);
 		CString message;
-		
-		// 디버깅용 테스트.
-		COLORREF third	= RGB(237, 249, 0);
-		COLORREF second = RGB(0, 255, 6);
-		COLORREF first	= RGB(255, 182, 0);
-		COLORREF out	= RGB(53, 53, 53);
 
-		if (third == colorOfHitPoint) {
+		if (CLR_THIRD_BASE.ToCOLORREF() == colorOfHitPoint.ToCOLORREF()) {
 			message = _T("3루타");
 		}
-		else if (second == colorOfHitPoint) {
+		else if (CLR_SECOND_BASE.ToCOLORREF() == colorOfHitPoint.ToCOLORREF()) {
 			message = _T("2루타");
 		}
-		else if (first == colorOfHitPoint) {
+		else if (CLR_FIRST_BASE.ToCOLORREF() == colorOfHitPoint.ToCOLORREF()) {
 			message = _T("1루타");
 		}
-		else if (out == colorOfHitPoint) {
+        else if (CLR_HOMERUN.ToCOLORREF() == colorOfHitPoint.ToCOLORREF()) {
+			message = _T("홈런");
+		}
+        else if (CLR_STRIKE.ToCOLORREF() == colorOfHitPoint.ToCOLORREF()) {
+			message = _T("스트라이크");
+		}
+        else if (CLR_BALL.ToCOLORREF() == colorOfHitPoint.ToCOLORREF()) {
+			message = _T("몸에 맞는 볼");
+		}
+        else if (CLR_HP.ToCOLORREF() == colorOfHitPoint.ToCOLORREF()) {
+			message = _T("1루타");
+		}
+		else if (CLR_OUT.ToCOLORREF() == colorOfHitPoint.ToCOLORREF()) {
 			message = _T("아웃");
 		}
 		else {
-			message = _T("스트라이크 또는 볼");
+			message = _T("범위 밖");
 		}
 
 		insertLog(message);
@@ -569,275 +509,6 @@ void CAmsongTesterDlg::captureImage()
         delete _capturedImage;
         _capturedImage = 0;
     }
-}
-
-void CAmsongTesterDlg::insertObjects()
-{
-	CString p1_x;
-	CString p1_y;
-	CString p2_x;
-	CString p2_y;
-	CString p3_x;
-	CString p3_y;
-	GetDlgItemText(IDC_EDIT_T1_P1_X, p1_x);
-	GetDlgItemText(IDC_EDIT_T1_P1_Y, p1_y);
-	GetDlgItemText(IDC_EDIT_T1_P2_X, p2_x);
-	GetDlgItemText(IDC_EDIT_T1_P2_Y, p2_y);
-	GetDlgItemText(IDC_EDIT_T1_P3_X, p3_x);
-	GetDlgItemText(IDC_EDIT_T1_P3_Y, p3_y);
-	_bigTriangle = Amsong::Triangle(
-		Amsong::Point(_ttoi(p1_x), _ttoi(p1_y)),
-		Amsong::Point(_ttoi(p2_x), _ttoi(p2_y)),
-		Amsong::Point(_ttoi(p3_x), _ttoi(p3_y)));
-
-	GetDlgItemText(IDC_EDIT_T2_P1_X, p1_x);
-	GetDlgItemText(IDC_EDIT_T2_P1_Y, p1_y);
-	GetDlgItemText(IDC_EDIT_T2_P2_X, p2_x);
-	GetDlgItemText(IDC_EDIT_T2_P2_Y, p2_y);
-	GetDlgItemText(IDC_EDIT_T2_P3_X, p3_x);
-	GetDlgItemText(IDC_EDIT_T2_P3_Y, p3_y);
-	_middleTriangle = Amsong::Triangle(
-		Amsong::Point(_ttoi(p1_x), _ttoi(p1_y)),
-		Amsong::Point(_ttoi(p2_x), _ttoi(p2_y)),
-		Amsong::Point(_ttoi(p3_x), _ttoi(p3_y)));
-
-	GetDlgItemText(IDC_EDIT_T3_P1_X, p1_x);
-	GetDlgItemText(IDC_EDIT_T3_P1_Y, p1_y);
-	GetDlgItemText(IDC_EDIT_T3_P2_X, p2_x);
-	GetDlgItemText(IDC_EDIT_T3_P2_Y, p2_y);
-	GetDlgItemText(IDC_EDIT_T3_P3_X, p3_x);
-	GetDlgItemText(IDC_EDIT_T3_P3_Y, p3_y);
-	_smallTriangle = Amsong::Triangle(
-		Amsong::Point(_ttoi(p1_x), _ttoi(p1_y)),
-		Amsong::Point(_ttoi(p2_x), _ttoi(p2_y)),
-		Amsong::Point(_ttoi(p3_x), _ttoi(p3_y)));
-
-	GetDlgItemText(IDC_EDIT_C1_P1_X, p1_x);
-	GetDlgItemText(IDC_EDIT_C1_P1_Y, p1_y);
-	GetDlgItemText(IDC_EDIT_C1_P2_X, p2_x);
-	GetDlgItemText(IDC_EDIT_C1_P2_Y, p2_y);
-	_pie1 = CRect(_ttoi(p1_x), _ttoi(p1_y), _ttoi(p2_x), _ttoi(p2_y));
-
-	GetDlgItemText(IDC_EDIT_C2_P1_X, p1_x);
-	GetDlgItemText(IDC_EDIT_C2_P1_Y, p1_y);
-	GetDlgItemText(IDC_EDIT_C2_P2_X, p2_x);
-	GetDlgItemText(IDC_EDIT_C2_P2_Y, p2_y);
-	_pie2 = CRect(_ttoi(p1_x), _ttoi(p1_y), _ttoi(p2_x), _ttoi(p2_y));
-
-	GetDlgItemText(IDC_EDIT_C3_P1_X, p1_x);
-	GetDlgItemText(IDC_EDIT_C3_P1_Y, p1_y);
-	GetDlgItemText(IDC_EDIT_C3_P2_X, p2_x);
-	GetDlgItemText(IDC_EDIT_C3_P2_Y, p2_y);
-	_pie3 = CRect(_ttoi(p1_x), _ttoi(p1_y), _ttoi(p2_x), _ttoi(p2_y));
-
-	_screen.setBigTriangle(_bigTriangle);
-	_screen.setMiddleTriangle(_middleTriangle);
-	_screen.setSmallTriangle(_smallTriangle);
-	_screen.setPies(_pie1, _pie2, _pie3);
-}
-
-void CAmsongTesterDlg::saveObjects()
-{
-	CString p1_x;
-	CString p1_y;
-	CString p2_x;
-	CString p2_y;
-	CString p3_x;
-	CString p3_y;
-
-	GetDlgItemText(IDC_EDIT_T1_P1_X, p1_x);
-	GetDlgItemText(IDC_EDIT_T1_P1_Y, p1_y);
-	GetDlgItemText(IDC_EDIT_T1_P2_X, p2_x);
-	GetDlgItemText(IDC_EDIT_T1_P2_Y, p2_y);
-	GetDlgItemText(IDC_EDIT_T1_P3_X, p3_x);
-	GetDlgItemText(IDC_EDIT_T1_P3_Y, p3_y);
-	theApp.WriteProfileStringW(L"AMSONG_APP", L"T1_P1_X", p1_x);
-	theApp.WriteProfileStringW(L"AMSONG_APP", L"T1_P1_Y", p1_y);
-	theApp.WriteProfileStringW(L"AMSONG_APP", L"T1_P2_X", p2_x);
-	theApp.WriteProfileStringW(L"AMSONG_APP", L"T1_P2_Y", p2_y);
-	theApp.WriteProfileStringW(L"AMSONG_APP", L"T1_P3_X", p3_x);
-	theApp.WriteProfileStringW(L"AMSONG_APP", L"T1_P3_Y", p3_y);
-
-	GetDlgItemText(IDC_EDIT_T2_P1_X, p1_x);
-	GetDlgItemText(IDC_EDIT_T2_P1_Y, p1_y);
-	GetDlgItemText(IDC_EDIT_T2_P2_X, p2_x);
-	GetDlgItemText(IDC_EDIT_T2_P2_Y, p2_y);
-	GetDlgItemText(IDC_EDIT_T2_P3_X, p3_x);
-	GetDlgItemText(IDC_EDIT_T2_P3_Y, p3_y);
-	theApp.WriteProfileStringW(L"AMSONG_APP", L"T2_P1_X", p1_x);
-	theApp.WriteProfileStringW(L"AMSONG_APP", L"T2_P1_Y", p1_y);
-	theApp.WriteProfileStringW(L"AMSONG_APP", L"T2_P2_X", p2_x);
-	theApp.WriteProfileStringW(L"AMSONG_APP", L"T2_P2_Y", p2_y);
-	theApp.WriteProfileStringW(L"AMSONG_APP", L"T2_P3_X", p3_x);
-	theApp.WriteProfileStringW(L"AMSONG_APP", L"T2_P3_Y", p3_y);
-	
-	GetDlgItemText(IDC_EDIT_T3_P1_X, p1_x);
-	GetDlgItemText(IDC_EDIT_T3_P1_Y, p1_y);
-	GetDlgItemText(IDC_EDIT_T3_P2_X, p2_x);
-	GetDlgItemText(IDC_EDIT_T3_P2_Y, p2_y);
-	GetDlgItemText(IDC_EDIT_T3_P3_X, p3_x);
-	GetDlgItemText(IDC_EDIT_T3_P3_Y, p3_y);
-	theApp.WriteProfileStringW(L"AMSONG_APP", L"T3_P1_X", p1_x);
-	theApp.WriteProfileStringW(L"AMSONG_APP", L"T3_P1_Y", p1_y);
-	theApp.WriteProfileStringW(L"AMSONG_APP", L"T3_P2_X", p2_x);
-	theApp.WriteProfileStringW(L"AMSONG_APP", L"T3_P2_Y", p2_y);
-	theApp.WriteProfileStringW(L"AMSONG_APP", L"T3_P3_X", p3_x);
-	theApp.WriteProfileStringW(L"AMSONG_APP", L"T3_P3_Y", p3_y);
-
-	GetDlgItemText(IDC_EDIT_C1_P1_X, p1_x);
-	GetDlgItemText(IDC_EDIT_C1_P1_Y, p1_y);
-	GetDlgItemText(IDC_EDIT_C1_P2_X, p2_x);
-	GetDlgItemText(IDC_EDIT_C1_P2_Y, p2_y);
-	theApp.WriteProfileStringW(L"AMSONG_APP", L"C1_P1_X", p1_x);
-	theApp.WriteProfileStringW(L"AMSONG_APP", L"C1_P1_Y", p1_y);
-	theApp.WriteProfileStringW(L"AMSONG_APP", L"C1_P2_X", p2_x);
-	theApp.WriteProfileStringW(L"AMSONG_APP", L"C1_P2_Y", p2_y);
-	
-	GetDlgItemText(IDC_EDIT_C2_P1_X, p1_x);
-	GetDlgItemText(IDC_EDIT_C2_P1_Y, p1_y);
-	GetDlgItemText(IDC_EDIT_C2_P2_X, p2_x);
-	GetDlgItemText(IDC_EDIT_C2_P2_Y, p2_y);
-	theApp.WriteProfileStringW(L"AMSONG_APP", L"C2_P1_X", p1_x);
-	theApp.WriteProfileStringW(L"AMSONG_APP", L"C2_P1_Y", p1_y);
-	theApp.WriteProfileStringW(L"AMSONG_APP", L"C2_P2_X", p2_x);
-	theApp.WriteProfileStringW(L"AMSONG_APP", L"C2_P2_Y", p2_y);
-	
-	GetDlgItemText(IDC_EDIT_C3_P1_X, p1_x);
-	GetDlgItemText(IDC_EDIT_C3_P1_Y, p1_y);
-	GetDlgItemText(IDC_EDIT_C3_P2_X, p2_x);
-	GetDlgItemText(IDC_EDIT_C3_P2_Y, p2_y);
-	theApp.WriteProfileStringW(L"AMSONG_APP", L"C3_P1_X", p1_x);
-	theApp.WriteProfileStringW(L"AMSONG_APP", L"C3_P1_Y", p1_y);
-	theApp.WriteProfileStringW(L"AMSONG_APP", L"C3_P2_X", p2_x);
-	theApp.WriteProfileStringW(L"AMSONG_APP", L"C3_P2_Y", p2_y);
-}
-
-void CAmsongTesterDlg::setPointToEditBox()
-{
-	CString temp;
-	temp.Format(_T("%d"), _bigTriangle.topLeft.x);
-	SetDlgItemText(IDC_EDIT_T1_P1_X, temp);
-	temp.Format(_T("%d"), _bigTriangle.topLeft.y);
-	SetDlgItemText(IDC_EDIT_T1_P1_Y, temp);
-	temp.Format(_T("%d"), _bigTriangle.topRight.x);
-	SetDlgItemText(IDC_EDIT_T1_P2_X, temp);
-	temp.Format(_T("%d"), _bigTriangle.topRight.y);
-	SetDlgItemText(IDC_EDIT_T1_P2_Y, temp);
-	temp.Format(_T("%d"), _bigTriangle.bottomCenter.x);
-	SetDlgItemText(IDC_EDIT_T1_P3_X, temp);
-	temp.Format(_T("%d"), _bigTriangle.bottomCenter.y);
-	SetDlgItemText(IDC_EDIT_T1_P3_Y, temp);
-
-	temp.Format(_T("%d"), _middleTriangle.topLeft.x);
-	SetDlgItemText(IDC_EDIT_T2_P1_X, temp);
-	temp.Format(_T("%d"), _middleTriangle.topLeft.y);
-	SetDlgItemText(IDC_EDIT_T2_P1_Y, temp);
-	temp.Format(_T("%d"), _middleTriangle.topRight.x);
-	SetDlgItemText(IDC_EDIT_T2_P2_X, temp);
-	temp.Format(_T("%d"), _middleTriangle.topRight.y);
-	SetDlgItemText(IDC_EDIT_T2_P2_Y, temp);
-	temp.Format(_T("%d"), _middleTriangle.bottomCenter.x);
-	SetDlgItemText(IDC_EDIT_T2_P3_X, temp);
-	temp.Format(_T("%d"), _middleTriangle.bottomCenter.y);
-	SetDlgItemText(IDC_EDIT_T2_P3_Y, temp);
-
-	temp.Format(_T("%d"), _smallTriangle.topLeft.x);
-	SetDlgItemText(IDC_EDIT_T3_P1_X, temp);
-	temp.Format(_T("%d"), _smallTriangle.topLeft.y);
-	SetDlgItemText(IDC_EDIT_T3_P1_Y, temp);
-	temp.Format(_T("%d"), _smallTriangle.topRight.x);
-	SetDlgItemText(IDC_EDIT_T3_P2_X, temp);
-	temp.Format(_T("%d"), _smallTriangle.topRight.y);
-	SetDlgItemText(IDC_EDIT_T3_P2_Y, temp);
-	temp.Format(_T("%d"), _smallTriangle.bottomCenter.x);
-	SetDlgItemText(IDC_EDIT_T3_P3_X, temp);
-	temp.Format(_T("%d"), _smallTriangle.bottomCenter.y);
-	SetDlgItemText(IDC_EDIT_T3_P3_Y, temp);
-
-	temp.Format(_T("%d"), _pie1.left);
-	SetDlgItemText(IDC_EDIT_C1_P1_X, temp);
-	temp.Format(_T("%d"), _pie1.top);
-	SetDlgItemText(IDC_EDIT_C1_P1_Y, temp);
-	temp.Format(_T("%d"), _pie1.right);
-	SetDlgItemText(IDC_EDIT_C1_P2_X, temp);
-	temp.Format(_T("%d"), _pie1.bottom);
-	SetDlgItemText(IDC_EDIT_C1_P2_Y, temp);
-
-	temp.Format(_T("%d"), _pie2.left);
-	SetDlgItemText(IDC_EDIT_C2_P1_X, temp);
-	temp.Format(_T("%d"), _pie2.top);
-	SetDlgItemText(IDC_EDIT_C2_P1_Y, temp);
-	temp.Format(_T("%d"), _pie2.right);
-	SetDlgItemText(IDC_EDIT_C2_P2_X, temp);
-	temp.Format(_T("%d"), _pie2.bottom);
-	SetDlgItemText(IDC_EDIT_C2_P2_Y, temp);
-
-	temp.Format(_T("%d"), _pie3.left);
-	SetDlgItemText(IDC_EDIT_C3_P1_X, temp);
-	temp.Format(_T("%d"), _pie3.top);
-	SetDlgItemText(IDC_EDIT_C3_P1_Y, temp);
-	temp.Format(_T("%d"), _pie3.right);
-	SetDlgItemText(IDC_EDIT_C3_P2_X, temp);
-	temp.Format(_T("%d"), _pie3.bottom);
-	SetDlgItemText(IDC_EDIT_C3_P2_Y, temp);
-}
-
-void CAmsongTesterDlg::moveAllGuidelineshorizontally(int steps)
-{
-	_bigTriangle.bottomCenter.x += steps;
-	_bigTriangle.topLeft.x += steps;
-	_bigTriangle.topRight.x += steps;
-
-	_middleTriangle.bottomCenter.x += steps;
-	_middleTriangle.topLeft.x += steps;
-	_middleTriangle.topRight.x += steps;
-
-	_smallTriangle.bottomCenter.x += steps;
-	_smallTriangle.topLeft.x += steps;
-	_smallTriangle.topRight.x += steps;
-
-	_pie1.left += steps;
-	_pie1.right += steps;
-	_pie2.left += steps;
-	_pie2.right += steps;
-	_pie3.left += steps;
-	_pie3.right += steps;
-
-	setPointToEditBox();
-
-	_screen.setBigTriangle(_bigTriangle);
-	_screen.setMiddleTriangle(_middleTriangle);
-	_screen.setSmallTriangle(_smallTriangle);
-	_screen.setPies(_pie1, _pie2, _pie3);
-}
-
-void CAmsongTesterDlg::moveAllGuidelinesVertically(int steps)
-{
-	_bigTriangle.bottomCenter.y += steps;
-	_bigTriangle.topLeft.y += steps;
-	_bigTriangle.topRight.y += steps;
-
-	_middleTriangle.bottomCenter.y += steps;
-	_middleTriangle.topLeft.y += steps;
-	_middleTriangle.topRight.y += steps;
-
-	_smallTriangle.bottomCenter.y += steps;
-	_smallTriangle.topLeft.y += steps;
-	_smallTriangle.topRight.y += steps;
-
-	_pie1.top += steps;
-	_pie1.bottom += steps;
-	_pie2.top += steps;
-	_pie2.bottom += steps;
-	_pie3.top += steps;
-	_pie3.bottom += steps;
-
-	setPointToEditBox();
-
-	_screen.setBigTriangle(_bigTriangle);
-	_screen.setMiddleTriangle(_middleTriangle);
-	_screen.setSmallTriangle(_smallTriangle);
-	_screen.setPies(_pie1, _pie2, _pie3);
 }
 
 void CAmsongTesterDlg::OnBnClickedButtonConnect()
@@ -1028,12 +699,11 @@ void CAmsongTesterDlg::OnBnClickedButtonTest()
 
 void CAmsongTesterDlg::OnBnClickedButtonLineApply()
 {
-	insertObjects();
 }
 
 void CAmsongTesterDlg::OnBnClickedButtonLineSave()
 {
-	saveObjects();
+    _shapeManager->saveAllPositions(&theApp);
 }
 
 void CAmsongTesterDlg::OnBnClickedButtonSaveImage()
@@ -1041,32 +711,18 @@ void CAmsongTesterDlg::OnBnClickedButtonSaveImage()
 	_screen.saveImage(_T("savedImage.bmp"));
 }
 
-
-void CAmsongTesterDlg::OnBnClickedButtonMoveAllLeft()
-{
-	moveAllGuidelineshorizontally(_moveGuidelineSize * (-1));
-}
-
-
-void CAmsongTesterDlg::OnBnClickedButtonMoveAllUp()
-{
-	moveAllGuidelinesVertically(_moveGuidelineSize * (-1));
-}
-
-
-void CAmsongTesterDlg::OnBnClickedButtonMoveAllDown()
-{
-	moveAllGuidelinesVertically(_moveGuidelineSize);
-}
-
-
-void CAmsongTesterDlg::OnBnClickedButtonMoveAllRight()
-{
-	moveAllGuidelineshorizontally(_moveGuidelineSize);
-}
-
-
 void CAmsongTesterDlg::OnBnClickedButtonSaveReferImage()
 {
     _screen.saveReferImage(_T("ReferImage.bmp"));
+}
+
+
+void CAmsongTesterDlg::OnBnClickedButtonRefDialog()
+{
+    _referShapeConfigDlg.reset(new CReferShapeConfigDlg());
+    _referShapeConfigDlg->Create(IDD_REFER_CONFIG_DIALOG, this);
+    if (_shapeManager.get()) {
+        _referShapeConfigDlg->setShapeManager(_shapeManager.get());
+    }
+    _referShapeConfigDlg->ShowWindow(SW_SHOW);
 }

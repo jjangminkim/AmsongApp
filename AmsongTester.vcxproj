@@ -112,6 +112,7 @@
     <ClInclude Include="AppTypes.h" />
     <ClInclude Include="DecoderSDK_Sample.h" />
     <ClInclude Include="ImageProcessor.h" />
+    <ClInclude Include="ReferShapeConfigDlg.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="ScreenFormatter.h" />
     <ClInclude Include="ScreenViewWnd.h" />
@@ -126,6 +127,7 @@
     <ClCompile Include="AmsongTesterDlg.cpp" />
     <ClCompile Include="DecoderSDK_Sample.cpp" />
     <ClCompile Include="ImageProcessor.cpp" />
+    <ClCompile Include="ReferShapeConfigDlg.cpp" />
     <ClCompile Include="ScreenFormatter.cpp" />
     <ClCompile Include="ScreenViewWnd.cpp" />
     <ClCompile Include="ShapeManager.cpp" />

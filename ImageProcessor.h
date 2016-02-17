@@ -20,10 +20,10 @@ public:
 
 	// _capturedImage에서 circle을 찾는다.
 	//	- return value : 찾은 circle의 center, (0,0)이면 찾지 못함.
-	Amsong::Point detectCircle();
+	Gdiplus::Point detectCircle();
 
 	// refer image에서의 point의 색상을 찾도록 한다.
-	COLORREF getColorOfPointFromReferImage(Amsong::Point hitPoint);
+	Gdiplus::Color getColorOfPointFromReferImage(Gdiplus::Point hitPoint);
 };
 
 

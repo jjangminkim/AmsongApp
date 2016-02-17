@@ -62,6 +62,9 @@
     <ClInclude Include="ShapeManager.h">
       <Filter>Shapes</Filter>
     </ClInclude>
+    <ClInclude Include="ReferShapeConfigDlg.h">
+      <Filter>UserInterface</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AmsongTester.cpp" />
@@ -89,6 +92,9 @@
     </ClCompile>
     <ClCompile Include="ShapeManager.cpp">
       <Filter>Shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="ReferShapeConfigDlg.cpp">
+      <Filter>UserInterface</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

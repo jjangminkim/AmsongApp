@@ -24,11 +24,20 @@ namespace Amsong {
 
         void addPoint(const Gdiplus::Point& point) { _points.push_back(point); }
         void setPoint(int i, const Gdiplus::Point& point);
+        void setPoints(const PointArray& points) { _points = points; }
+        void clearAllPoints() { _points.clear(); }
         void setColor(const Gdiplus::Color& color) { _color = color; }
 
+        const PointArray& points() const { return _points; }
+
     public:
-        virtual void moveHorizontally(int step) = 0;
-        virtual void moveVertically(int step) = 0;
+        bool allPointsAreZero();
+        void loadPoints(CWinApp* app, const CString& keyName);
+        void savePoints(CWinApp* app, const CString& keyName);
+        void moveHorizontally(int step);
+        void moveVertically(int step);
+
+    public:
         virtual void drawShape(Gdiplus::Graphics* g) = 0;
         virtual void fillShape(Gdiplus::Graphics* g) = 0;
     };
@@ -48,8 +57,6 @@ namespace Amsong {
         virtual ~Polygon() {}
 
     public:
-        virtual void moveHorizontally(int step);
-        virtual void moveVertically(int step);
         virtual void drawShape(Gdiplus::Graphics* g);
         virtual void fillShape(Gdiplus::Graphics* g);
 
@@ -72,13 +79,13 @@ namespace Amsong {
         void setAngle(const Angle& angle) { _angle = angle; }
         void setSize(int width, int height);
 
+        const Angle& angle() const { return _angle; }
+
     public:
         int width() const;
         int height() const;
 
     public:
-        virtual void moveHorizontally(int step);
-        virtual void moveVertically(int step);
         virtual void drawShape(Gdiplus::Graphics* g);
         virtual void fillShape(Gdiplus::Graphics* g);
 
