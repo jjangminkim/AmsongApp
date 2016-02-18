@@ -26,30 +26,34 @@ bool Shape::allPointsAreZero()
     return allZero;
 }
 
-void Shape::loadPoints(CWinApp* app, const CString& keyName)
+void Shape::loadPoints(CWinApp* app, const CString& keyName, int size)
 {
     CString keyNameX, keyNameY;
-    for (unsigned int i = 0; i < _points.size(); ++i) {
+    _points.clear();
+    for (unsigned int i = 0; i < size; ++i) {
+        Gdiplus::Point point;
         keyNameX = keyName;
-        keyNameX.AppendFormat(_T("_P%d_X"));
-        _points[i].X = app->GetProfileInt(APP_NAME, keyNameX, 0);
+        keyNameX.AppendFormat(_T("_P%d_X"), i);
+        point.X = app->GetProfileInt(APP_NAME, keyNameX, 0);
 
         keyNameY = keyName;
-        keyNameY.AppendFormat(_T("_P%d_Y"));
-        _points[i].Y = app->GetProfileInt(APP_NAME, keyNameY, 0);
+        keyNameY.AppendFormat(_T("_P%d_Y"), i);
+        point.Y = app->GetProfileInt(APP_NAME, keyNameY, 0);
+
+        _points.push_back(point);
     }
 }
 
-void Shape::savePoints(CWinApp* app, const CString& keyName)
+void Shape::savePoints(CWinApp* app, const CString& keyName, int size)
 {
     CString keyNameX, keyNameY;
     for (unsigned int i = 0; i < _points.size(); ++i) {
         keyNameX = keyName;
-        keyNameX.AppendFormat(_T("_P%d_X"));
+        keyNameX.AppendFormat(_T("_P%d_X"), i);
         app->WriteProfileInt(APP_NAME, keyNameX, _points[i].X);
 
         keyNameY = keyName;
-        keyNameY.AppendFormat(_T("_P%d_Y"));
+        keyNameY.AppendFormat(_T("_P%d_Y"), i);
         app->WriteProfileInt(APP_NAME, keyNameY, _points[i].Y);
     }
 }

@@ -32,8 +32,8 @@ namespace Amsong {
 
     public:
         bool allPointsAreZero();
-        void loadPoints(CWinApp* app, const CString& keyName);
-        void savePoints(CWinApp* app, const CString& keyName);
+        void loadPoints(CWinApp* app, const CString& keyName, int size);
+        void savePoints(CWinApp* app, const CString& keyName, int size);
         void moveHorizontally(int step);
         void moveVertically(int step);
 

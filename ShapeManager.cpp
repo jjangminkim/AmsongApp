@@ -10,10 +10,10 @@ using namespace Gdiplus;
     for (i = 0; i < MAX_TRIS; ++i) {    \
         _triangles[i].func();           \
     }                                   \
-    for (i = 0; i < MAX_PIES; ++i) {   \
+    for (i = 0; i < MAX_PIES; ++i) {    \
         _pies[i].func();                \
     }                                   \
-    for (i = 0; i < MAX_RECTS; ++i) {    \
+    for (i = 0; i < MAX_RECTS; ++i) {   \
         _rectangles[i].func();          \
     }
 
@@ -22,10 +22,10 @@ using namespace Gdiplus;
     for (i = 0; i < MAX_TRIS; ++i) {                    \
         _triangles[i].func(param);                      \
     }                                                   \
-    for (i = 0; i < MAX_PIES; ++i) {                   \
+    for (i = 0; i < MAX_PIES; ++i) {                    \
         _pies[i].func(param);                           \
     }                                                   \
-    for (i = 0; i < MAX_RECTS; ++i) {                    \
+    for (i = 0; i < MAX_RECTS; ++i) {                   \
         _rectangles[i].func(param);                     \
     }
 
@@ -33,16 +33,16 @@ using namespace Gdiplus;
     unsigned int i;                                 \
     CString key;                                    \
     for (i = 0; i < MAX_TRIS; ++i) {                \
-        key.Format(_T("TRIANGLE%d"));               \
-        _triangles[i].func(param, key);             \
+        key.Format(_T("TRIANGLE%d"), i);            \
+        _triangles[i].func(param, key, 3);          \
     }                                               \
-    for (i = 0; i < MAX_PIES; ++i) {               \
-        key.Format(_T("PIE%d"));                    \
-        _pies[i].func(param, key);                  \
+    for (i = 0; i < MAX_PIES; ++i) {                \
+        key.Format(_T("PIE%d"), i);                 \
+        _pies[i].func(param, key, 2);               \
     }                                               \
-    for (i = 0; i < MAX_RECTS; ++i) {                \
-        key.Format(_T("RECTANGLE%d"));              \
-        _rectangles[i].func(param, key);            \
+    for (i = 0; i < MAX_RECTS; ++i) {               \
+        key.Format(_T("RECTANGLE%d"), i);           \
+        _rectangles[i].func(param, key, 4);         \
     }
 
 ShapeManager::ShapeManager(CWinApp* app)
@@ -65,7 +65,7 @@ ShapeManager::ShapeManager(CWinApp* app)
     // registry에 저장된 값이 있으면, 불러온다.
     CString key;
     key.Format(_T("RECTANGLE%d"), OUT_CENTER_RECT);
-    _rectangles[OUT_CENTER_RECT].loadPoints(app, key);
+    _rectangles[OUT_CENTER_RECT].loadPoints(app, key, 4);
     if (_rectangles[OUT_CENTER_RECT].allPointsAreZero()) {
         initPoints();
     }
